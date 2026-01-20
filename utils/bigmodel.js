@@ -1,10 +1,40 @@
 /**
- * BigModel API Integration Module
- * Handles communication with BigModel's chat completion API
+ * Multi-Model API Integration Module
+ * Supports BigModel GLM-4.7, DeepSeek-Chat, and DeepSeek-Reasoner APIs
  */
 
-const API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
+const GLM_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
 const IMAGE_API_URL = 'https://open.bigmodel.cn/api/paas/v4/images/generations'
+
+/**
+ * Get API URL and key based on model selection
+ * @param {string} model - Model name ('glm-4.7', 'deepseek-chat', or 'deepseek-reasoner')
+ * @param {Object} apiKeys - Object containing both API keys
+ * @returns {Object} { url, key, model }
+ */
+function getApiConfig(model, apiKeys) {
+  if (model === 'deepseek-chat') {
+    return {
+      url: DEEPSEEK_API_URL,
+      key: apiKeys.deepseekApiKey,
+      model: 'deepseek-chat'
+    }
+  } else if (model === 'deepseek-reasoner') {
+    return {
+      url: DEEPSEEK_API_URL,
+      key: apiKeys.deepseekApiKey,
+      model: 'deepseek-reasoner'
+    }
+  } else {
+    // Default to GLM-4.7
+    return {
+      url: GLM_API_URL,
+      key: apiKeys.glmApiKey,
+      model: 'glm-4.7'
+    }
+  }
+}
 
 const categoryPromptsData = {
   en: {
@@ -44,7 +74,7 @@ const categoryPromptsData = {
     'gear': '飞钓装备技巧、设备评论和建议',
     'conservation': '飞钓保护、河流生态系统保护、可持续垂钓实践',
     'reading water': '读水技巧、识别鱼类栖息地、理解水流模式',
-    'presentation': '飞钓呈现技巧、无阻力漂移、准确修线',
+    'presentation': '飞钓呈现技巧、无阻力随挥、准确修线',
     'catch and release': '钓获放流最佳实践、正确鱼类处理、存活技巧',
     'match hatch': '钩饵匹配、昆虫识别、飞饵选择策略',
     'wading safety': '涉水安全技巧、河流穿越技巧、适当涉水装备',
@@ -143,8 +173,11 @@ const categoryLabelsData = {
 function generateArticle(category, apiKey, language = 'en', onProgress = null) {
   return new Promise((resolve, reject) => {
     const categoryPrompts = categoryPromptsData
-    const topic = categoryPrompts[language][category] || categoryPrompts[language]['all']
-    const categoryLabel = categoryLabelsData[language][category] || 'Fly Fishing'
+
+    // Use the category directly if it's not in the predefined list (custom input)
+    // Otherwise use the predefined prompt
+    const topic = categoryPrompts[language][category] || category
+    const categoryLabel = categoryLabelsData[language][category] || category
 
     const systemPrompt = language === 'en'
       ? `You are an expert fly fishing writer. Create engaging, informative, and practical articles about ${topic}.
@@ -360,21 +393,30 @@ JSON格式：
 /**
  * Generate article outline (title + section summaries) for faster parallel processing
  * @param {string} category - Article category
- * @param {string} apiKey - BigModel API key
+ * @param {string} apiKey - API key (deprecated, use apiKeys instead)
  * @param {string} language - Article language ('en' or 'zh')
  * @param {Function} onProgress - Progress callback
+ * @param {string} model - Model to use ('glm-4.7' or 'deepseek-chat')
+ * @param {Object} apiKeys - Object containing { glmApiKey, deepseekApiKey }
  * @returns {Promise<Object>} Article outline with title and section summaries
  */
-function generateArticleOutline(category, apiKey, language = 'en', onProgress = null) {
+function generateArticleOutline(category, apiKey, language = 'en', onProgress = null, model = 'glm-4.7', apiKeys = null) {
   return new Promise((resolve, reject) => {
     const categoryPrompts = categoryPromptsData
-    const topic = categoryPrompts[language][category] || categoryPrompts[language]['all']
-    const categoryLabel = categoryLabelsData[language][category] || 'Fly Fishing'
+
+    // Use the category directly if it's not in the predefined list (custom input)
+    // Otherwise use the predefined prompt
+    const topic = categoryPrompts[language][category] || category
+    const categoryLabel = categoryLabelsData[language][category] || category
+
+    console.log('[generateArticleOutline] category input:', category)
+    console.log('[generateArticleOutline] topic used:', topic)
+    console.log('[generateArticleOutline] categoryLabel:', categoryLabel)
 
     const systemPrompt = language === 'en'
       ? `You are an expert fly fishing writer. Create a comprehensive article outline about ${topic}.
 
-IMPORTANT: Output ONLY valid JSON. No markdown, no code blocks.
+!!! WARNING: SUMMARY WORD COUNT LIMIT - 5 TO 10 WORDS MAXIMUM !!!
 
 Required Structure:
 {
@@ -383,7 +425,7 @@ Required Structure:
     {
       "index": 1,
       "title": "Section 1 brief title",
-      "summary": "2-3 sentence summary of what this section will cover",
+      "summary": "5-10 words ONLY - NO MORE",
       "imagePrompt": "Detailed image description for this section"
     },
     ... (5 sections total)
@@ -393,16 +435,25 @@ Required Structure:
   ]
 }
 
-Requirements:
+REQUIREMENTS:
 - Create exactly 5 sections covering different aspects of the topic
-- Each section should be practical and actionable
+- !!! SUMMARY LIMIT: 5-10 WORDS ABSOLUTE MAXIMUM !!!
+- Count EVERY word - if summary has 11+ words, it's WRONG
+- GOOD examples (5-10 words):
+  * "Master basic casting techniques" (4 words)
+  * "Select essential fishing gear" (4 words)
+  * "Learn proper fly selection" (4 words)
+- BAD examples (TOO LONG):
+  * "Learn how to cast your fly accurately" (7 words - acceptable)
+  * "Master the art of fly casting with these proven techniques for beginners" (12 words - WRONG, TOO LONG)
+- Keep summaries ULTRA SHORT - like headlines, not descriptions
 - Image prompts should describe professional fly fishing photography
 - Include 3-5 real reference URLs
 
 Output ONLY the JSON object.`
       : `你是一位资深的飞钓专家。请创作关于${topic}的文章大纲。
 
-重要说明：只输出有效的JSON格式。不要输出markdown或代码块。
+!!! 警告：摘要字数限制 - 最多5到10个单词 !!!
 
 要求的结构：
 {
@@ -411,7 +462,7 @@ Output ONLY the JSON object.`
     {
       "index": 1,
       "title": "第1节简短标题",
-      "summary": "2-3句话总结本节内容",
+      "summary": "只许5-10个单词 - 不能再多",
       "imagePrompt": "本节的详细图片描述"
     },
     ... (共5个章节)
@@ -423,7 +474,16 @@ Output ONLY the JSON object.`
 
 要求：
 - 创建正好5个章节，涵盖主题的不同方面
-- 每个章节应该实用且可操作
+- !!! 摘要限制：绝对最多5-10个单词 !!!
+- 每个单词都要数 - 如果摘要有11个或更多单词，就是错的
+- 好的例子（5-10个单词）：
+  * "掌握基本抛投技巧"（4个词）
+  * "选择必要钓鱼装备"（4个词）
+  * "学习正确拟饵选择"（4个词）
+- 坏的例子（太长了）：
+  * "学习如何准确抛出你的拟饵"（7个词 - 可以接受）
+  * "通过这些经过验证的技术掌握飞钓艺术适合初学者"（12个词 - 错误，太长了）
+- 保持摘要超级短 - 像标题，不是描述
 - 图片提示词应描述专业飞钓摄影
 - 包含3-5个真实参考URL
 
@@ -437,8 +497,11 @@ Output ONLY the JSON object.`
       })
     }
 
+    // Get API config based on model selection
+    const apiConfig = getApiConfig(model, apiKeys || { glmApiKey: apiKey, deepseekApiKey: '' })
+
     const requestPayload = {
-      model: 'glm-4.7',
+      model: apiConfig.model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: language === 'en' ? `Create a detailed article outline about ${topic}.` : `请创建关于${topic}的详细文章大纲。` }
@@ -451,11 +514,11 @@ Output ONLY the JSON object.`
 
     function makeApiRequest(retryCount = 0) {
       wx.request({
-        url: API_URL,
+        url: apiConfig.url,
         method: 'POST',
         header: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${apiConfig.key}`
         },
         data: requestPayload,
         timeout: 90000,
@@ -515,11 +578,17 @@ Output ONLY the JSON object.`
 /**
  * Expand a single section summary into full content
  * @param {Object} section - Section with index, title, summary, imagePrompt
- * @param {string} apiKey - BigModel API key
+ * @param {string} apiKey - API key (deprecated)
  * @param {string} language - Language
+ * @param {string} model - Model to use
+ * @param {Object} apiKeys - Object containing { glmApiKey, deepseekApiKey }
  * @returns {Promise<Object>} Expanded section with intro and subParagraphs
  */
-function expandSection(section, apiKey, language = 'en') {
+function expandSection(section, apiKey, language = 'en', model = 'glm-4.7', apiKeys = null) {
+  console.log('[expandSection] START - Section:', section.title)
+  console.log('[expandSection] Language:', language)
+  console.log('[expandSection] Model:', model)
+
   return new Promise((resolve, reject) => {
     const systemPrompt = language === 'en'
       ? `You are an expert fly fishing writer. Expand the following section summary into a complete section.
@@ -529,17 +598,21 @@ Section Summary: ${section.summary}
 
 Requirements:
 - Write an introduction (2-4 sentences expanding on the summary)
-- Create 3-5 sub-paragraphs (each 1-3 sentences)
-- Content must be practical, actionable, and informative
+- Create 4-6 detailed sub-paragraphs
+- Each sub-paragraph should be 4-8 sentences with in-depth information
+- Start each sub-paragraph with a number prefix like "1. ", "2. ", "3. " etc.
+- Content must be practical, actionable, and highly informative
+- Include specific techniques, tips, or examples
 - Use clear, professional language
+- CRITICAL: If the intro text contains numbered points or sections, use Roman numerals (I., II., III., IV., V., VI., etc.) instead of Arabic numbers (1., 2., 3.)
 
 Output ONLY valid JSON in this format:
 {
-  "intro": "Introduction text here...",
+  "intro": "Introduction text here. If you include numbered points in the intro, use Roman numerals like I., II., III., IV., V., VI.",
   "subParagraphs": [
-    "Sub-paragraph 1...",
-    "Sub-paragraph 2...",
-    "Sub-paragraph 3..."
+    "1. First detailed point with comprehensive information...",
+    "2. Second detailed point with comprehensive information...",
+    "3. Third detailed point with comprehensive information..."
   ]
 }`
       : `你是一位资深的飞钓专家。将以下章节摘要扩展为完整章节。
@@ -549,78 +622,115 @@ Output ONLY valid JSON in this format:
 
 要求：
 - 撰写介绍（2-4句话，扩展摘要）
-- 创建3-5个子段落（每段1-3句话）
+- 创建4-6个详细子段落
+- 每个子段落应为4-8句话，包含深入信息
+- 每个子段落以数字前缀开头，如"1. "、"2. "、"3. "等
 - 内容必须实用、可操作且信息丰富
+- 包含具体技巧、提示或示例
 - 使用清晰、专业的语言
+- 关键：如果介绍文本中包含编号要点或章节，请使用罗马数字（I.、II.、III.、IV.、V.、VI. 等）而不是阿拉伯数字（1.、2.、3.）
 
 只输出以下格式的有效JSON：
 {
-  "intro": "介绍文本...",
+  "intro": "介绍文本... 如果您在介绍中包含编号要点，请使用罗马数字，如 I.、II.、III.、IV.、V.、VI.",
   "subParagraphs": [
-    "子段落1...",
-    "子段落2...",
-    "子段落3..."
+    "1. 第一个详细要点，包含全面信息...",
+    "2. 第二个详细要点，包含全面信息...",
+    "3. 第三个详细要点，包含全面信息..."
   ]
 }`
 
+    // Get API config based on model selection
+    const apiConfig = getApiConfig(model, apiKeys || { glmApiKey: apiKey, deepseekApiKey: '' })
+
     const requestPayload = {
-      model: 'glm-4-flash', // Use faster model for expansion
+      model: apiConfig.model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: language === 'en' ? 'Expand this section into full content.' : '将此章节扩展为完整内容。' }
       ],
       temperature: 0.8,
       top_p: 0.95,
-      max_tokens: 2048,
+      max_tokens: 4096,
       stream: false
     }
 
     wx.request({
-      url: API_URL,
+      url: apiConfig.url,
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiConfig.key}`
       },
       data: requestPayload,
       timeout: 60000,
       success: (response) => {
+        console.log('[expandSection] Response status:', response.statusCode)
+        console.log('[expandSection] Response data:', JSON.stringify(response.data))
+
         try {
           if (response.statusCode === 200 && response.data.choices && response.data.choices.length > 0) {
             let content = response.data.choices[0].message.content.trim()
+            console.log('[expandSection] Raw content length:', content.length)
+            console.log('[expandSection] Raw content:', content.substring(0, 200))
+
             content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+            console.log('[expandSection] Cleaned content:', content.substring(0, 200))
 
             const sectionData = JSON.parse(content)
+            console.log('[expandSection] Parsed sectionData:', JSON.stringify(sectionData))
+            console.log('[expandSection] subParagraphs count:', sectionData.subParagraphs?.length || 0)
 
-            resolve({
+            const result = {
               intro: sectionData.intro || section.summary,
               subParagraphs: sectionData.subParagraphs || [],
               imagePrompt: section.imagePrompt
+            }
+            console.log('[expandSection] RESOLVING with subParagraphs count:', result.subParagraphs.length)
+            console.log('[expandSection] Final result structure:', {
+              hasIntro: !!result.intro,
+              subParagraphsCount: result.subParagraphs.length,
+              hasImagePrompt: !!result.imagePrompt
             })
+            resolve(result)
           } else {
+            console.error('[expandSection] API returned non-200 or no choices')
+            console.error('[expandSection] Status code:', response.statusCode)
+            console.error('[expandSection] Has choices:', !!(response.data.choices && response.data.choices.length > 0))
             // Fallback to original summary if API fails
-            resolve({
+            const fallback = {
               intro: section.summary,
               subParagraphs: [],
               imagePrompt: section.imagePrompt
-            })
+            }
+            console.log('[expandSection] FALLBACK - using empty subParagraphs')
+            resolve(fallback)
           }
         } catch (error) {
+          console.error('[expandSection] Parse error:', error)
+          console.error('[expandSection] Error message:', error.message)
+          console.error('[expandSection] Error stack:', error.stack)
           // Fallback to original summary on parse error
-          resolve({
+          const fallback = {
             intro: section.summary,
             subParagraphs: [],
             imagePrompt: section.imagePrompt
-          })
+          }
+          console.log('[expandSection] FALLBACK (parse error) - using empty subParagraphs')
+          resolve(fallback)
         }
       },
       fail: (error) => {
+        console.error('[expandSection] Network error:', error)
+        console.error('[expandSection] Error details:', JSON.stringify(error))
         // Fallback to original summary on network error
-        resolve({
+        const fallback = {
           intro: section.summary,
           subParagraphs: [],
           imagePrompt: section.imagePrompt
-        })
+        }
+        console.log('[expandSection] FALLBACK (network error) - using empty subParagraphs')
+        resolve(fallback)
       }
     })
   })
@@ -738,8 +848,9 @@ async function generateHeroImage(title, category, apiKey, onProgress = null) {
     'all': 'fly fishing scene, river fishing, angler with fly rod'
   }
 
-  const basePrompt = categoryPrompts[category] || categoryPrompts['all']
-  const prompt = `${basePrompt}. ${title}. Professional photography, high quality, natural lighting, fly fishing theme, scenic landscape.`
+  // Use predefined prompt if available, otherwise use the category directly
+  const basePrompt = categoryPrompts[category] || `${category}, fly fishing`
+  const prompt = `${basePrompt}. ${title}. Professional photography, high quality, natural lighting, scenic landscape.`
 
   try {
     // Report starting hero image generation

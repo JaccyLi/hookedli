@@ -1,6 +1,9 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/articles/articles",
+    "pages/settings/settings",
+    "pages/articles/md/inter-casting.md"
   ],
   "window": {
     "backgroundTextStyle": "light",

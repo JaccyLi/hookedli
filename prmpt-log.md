@@ -23,8 +23,3 @@ generate 200 fly fishing tips(casting, flytying, anglingbio, gear, etc), with en
 ]
 }
 ```
-
-generate 
----
-
-xxx

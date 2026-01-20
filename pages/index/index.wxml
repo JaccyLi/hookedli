@@ -1,222 +1,266 @@
 <!-- pages/index/index.wxml -->
-<view class="container">
-  <view class="header">
-    <text class="title">{{uiText.title}}</text>
-    <text class="subtitle">{{uiText.subtitle}}</text>
+<view class="swab-container">
+  <!-- Top Navigation -->
+  <view class="swab-nav">
+    <text class="swab-logo">{{uiText.title}}</text>
+    <view class="swab-nav-actions">
+      <view class="swab-action-btn" bindtap="toggleLanguage">
+        {{language === 'en' ? 'EN' : '中'}}
+      </view>
+      <view class="swab-action-btn" bindtap="goToSettings">⚙️</view>
+    </view>
   </view>
 
-  <!-- Language Toggle -->
-  <view class="lang-toggle">
-    <button class="lang-btn" bindtap="toggleLanguage" size="mini">
-      {{language === 'en' ? 'EN' : '中'}}
-    </button>
+  <!-- Hero Section -->
+  <view class="swab-hero" wx:if="{{!cardData && !loading && !error}}">
+    <text class="swab-hero-title">{{uiText.title}}</text>
+    <text class="swab-hero-subtitle">{{uiText.subtitle}}</text>
+    <view class="swab-hero-icon">🎣</view>
+    <view class="swab-flashcard-hero-btn" bindtap="generateJoke">
+      <text class="swab-flashcard-icon">🎯</text>
+      <text class="swab-flashcard-text">{{uiText.jokeBtn}}</text>
+    </view>
   </view>
 
-  <!-- Article Container -->
-  <view class="article-container" wx:if="{{cardData}}">
-    <view class="article">
-      <!-- Article Hero Image -->
-      <image
-        class="article-hero-image"
-        src="{{cardData.imageUrl}}"
-        mode="aspectFill"
-        lazy-load="true"
-      ></image>
+  <!-- Quick Actions Section -->
+  <view class="swab-quick-actions" wx:if="{{!cardData && !loading && !error}}">
+    <view class="action-card" bindtap="goToArticles">
+      <view class="action-icon-large">📚</view>
+      <text class="action-title">{{language === 'en' ? 'Read Articles' : '精选文章'}}</text>
+      <text class="action-desc">{{language === 'en' ? 'Browse our curated collection of fly fishing guides' : '非AI生成的文章或者翻译的文章'}}</text>
+      <view class="action-meta">
+        <text class="action-count">{{articleCount}} {{language === 'en' ? 'article' : '篇文章'}}</text>
+        <text class="action-arrow">→</text>
+      </view>
+    </view>
 
-      <!-- Article Content -->
-      <view class="article-content">
-        <view class="article-meta">
-          <view class="article-tag">{{cardData.category}}</view>
-          <!-- Copy Article Button -->
-          <button class="export-pdf-btn-small" bindtap="copyArticle">
-            {{uiText.copyArticle}}
-          </button>
+    <view class="action-card action-card-primary" bindtap="scrollToCategories">
+      <view class="action-icon-large">✨</view>
+      <text class="action-title">{{language === 'en' ? 'Generate New Article' : '生成新文章'}}</text>
+      <text class="action-desc">{{language === 'en' ? 'AI-powered article creation on any topic' : 'AI驱动的任意主题文章创作'}}</text>
+      <view class="action-meta">
+        <text class="action-count">{{language === 'en' ? 'Choose category or enter custom topic' : '选择分类或输入自定义主题来生成文章'}}</text>
+        <text class="action-arrow">↓</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Tips Section -->
+  <view class="swab-tips-section" wx:if="{{!cardData && !loading && !error}}">
+    <view class="tips-header">
+      <text class="tips-title">{{language === 'en' ? '💡 How It Works' : '💡 使用指南'}}</text>
+    </view>
+    <view class="tips-list">
+      <view class="tip-item">
+        <view class="tip-number">1</view>
+        <view class="tip-content">
+          <text class="tip-title">{{language === 'en' ? 'Read Pre-Written Articles' : '阅读现成文章'}}</text>
+          <text class="tip-desc">{{language === 'en' ? 'Tap "Read Articles" to browse our expert-curated guides on casting, tying, biology, and gear.' : '点击"精选文章"浏览我们专家策划的抛投、绑钩、生物学和装备指南。'}}</text>
+        </view>
+      </view>
+      <view class="tip-item">
+        <view class="tip-number">2</view>
+        <view class="tip-content">
+          <text class="tip-title">{{language === 'en' ? 'Generate Custom Articles' : '生成自定义文章'}}</text>
+          <text class="tip-desc">{{language === 'en' ? 'Select a category below or type your own topic to generate a unique AI-powered article.' : '在下方选择分类或输入自己的主题，生成独特的AI驱动文章。'}}</text>
+        </view>
+      </view>
+      <view class="tip-item">
+        <view class="tip-number">3</view>
+        <view class="tip-content">
+          <text class="tip-title">{{language === 'en' ? 'Learn with Flashcards' : '用闪卡学习'}}</text>
+          <text class="tip-desc">{{language === 'en' ? 'Tap the flashcard button while generating to learn fly fishing terminology.' : '在生成过程中点击闪卡按钮学习飞钓术语。'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Main Content -->
+  <view class="swab-content">
+    <!-- Article Display -->
+    <view class="swab-article" wx:if="{{cardData}}">
+      <image class="swab-article-image" src="{{cardData.imageUrl}}" mode="aspectFill"></image>
+
+      <view class="swab-article-body">
+        <view class="swab-article-header">
+          <view class="swab-tag">{{cardData.category}}</view>
+          <view class="swab-copy-btn" bindtap="copyArticle">
+            📋 {{uiText.copyArticle}}
+          </view>
         </view>
 
-        <text class="article-title">{{cardData.title}}</text>
+        <text class="swab-article-title">{{cardData.title}}</text>
 
-        <!-- Paragraphs -->
-        <view class="article-paragraphs">
-          <view class="article-paragraph" wx:for="{{cardData.paragraphs}}" wx:key="index">
-            <!-- Paragraph Image -->
-            <image
-              class="paragraph-image"
-              src="{{item.imageUrl}}"
-              mode="aspectFill"
-              lazy-load="true"
-            ></image>
-
-            <!-- Paragraph Intro -->
-            <view class="paragraph-intro">
-              <text>{{item.intro}}</text>
-            </view>
-
-            <!-- Sub-paragraphs -->
-            <view class="sub-paragraphs" wx:if="{{item.subParagraphs && item.subParagraphs.length > 0}}">
-              <view class="sub-paragraph" wx:for="{{item.subParagraphs}}" wx:for-item="subPara" wx:key="*this">
-                <text>{{subPara}}</text>
+        <view class="swab-sections">
+          <view class="swab-section" wx:for="{{cardData.paragraphs}}" wx:key="index">
+            <image class="swab-section-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
+            <view class="swab-section-content">
+              <text class="swab-section-intro">{{item.intro}}</text>
+              <view class="swab-subpoints" wx:if="{{item.subParagraphs && item.subParagraphs.length > 0}}">
+                <view class="swab-subpoint" wx:for="{{item.subParagraphs}}" wx:for-item="sub" wx:key="*this">
+                  <text class="subpoint-text">{{sub}}</text>
+                </view>
               </view>
             </view>
           </view>
         </view>
 
-        <!-- References/Appendix -->
-        <view class="article-appendix" wx:if="{{cardData.references && cardData.references.length > 0}}">
-          <view class="appendix-title">{{language === 'en' ? 'References' : '参考来源'}}</view>
-          <view class="references-list">
-            <view class="reference-item" wx:for="{{cardData.references}}" wx:key="url">
-              <text class="reference-title">{{item.title}}</text>
-              <navigator class="reference-url" url="{{item.url}}" target="miniProgram" open-type="navigator">
-                {{item.url}}
-              </navigator>
-              <view class="copy-hint" bindtap="copyUrl" data-url="{{item.url}}">
-                {{language === 'en' ? 'Tap to copy' : '点击复制'}}
+        <view class="swab-references" wx:if="{{cardData.references && cardData.references.length > 0}}">
+          <text class="swab-ref-title">{{language === 'en' ? 'REFERENCES' : '参考来源'}}</text>
+          <view class="swab-ref-list">
+            <view class="swab-ref-item" wx:for="{{cardData.references}}" wx:key="url">
+              <view class="swab-ref-content">
+                <text class="swab-ref-name">{{item.title}}</text>
+                <text class="swab-ref-link">{{item.url}}</text>
+              </view>
+              <view class="swab-ref-copy" bindtap="copyUrl" data-url="{{item.url}}">
+                📋
               </view>
             </view>
           </view>
         </view>
       </view>
     </view>
-  </view>
 
-  <!-- Loading State -->
-  <view class="loading-container" wx:if="{{loading}}">
-    <view class="loading-spinner"></view>
-    <view class="loading-info">
-      <text class="loading-title">{{loadingTitle}}</text>
-      <text class="loading-step">{{loadingStep}}</text>
-      <text class="loading-detail">{{loadingDetail}}</text>
-      <text class="loading-tip">{{loadingTip}}</text>
+    <!-- Loading State -->
+    <view class="swab-loading" wx:if="{{loading}}">
+      <view class="swab-loader-ring"></view>
+      <text class="swab-loading-title">{{loadingTitle}}</text>
+      <text class="swab-loading-text">{{loadingStep}}</text>
+      <text class="swab-loading-detail">{{loadingDetail}}</text>
+
+      <view class="swab-tip-btn" bindtap="generateJoke">
+        <text class="tip-icon">🎣</text>
+        <text class="tip-text">{{uiText.jokeBtn}}</text>
+      </view>
     </view>
-    <button class="joke-btn" bindtap="generateJoke">
-      {{uiText.jokeBtn}}
-    </button>
-    <view class="joke-container" wx:if="{{showJoke}}">
-      <text class="joke-text">{{jokeText}}</text>
+
+    <!-- Error State -->
+    <view class="swab-error" wx:if="{{error}}">
+      <text class="error-icon">⚠️</text>
+      <text class="error-text">{{error}}</text>
     </view>
   </view>
 
-  <!-- Error State -->
-  <view class="error-container" wx:if="{{error}}">
-    <text class="error-text">{{error}}</text>
+  <!-- Section Divider -->
+  <view class="swab-section-divider" wx:if="{{!loading && !cardData && !error}}">
+    <view class="divider-line"></view>
   </view>
 
-  <!-- Initial State / Empty -->
-  <view class="empty-state" wx:if="{{!cardData && !loading && !error}}">
-    <text class="empty-text">{{uiText.emptyText}}</text>
-  </view>
-
-  <!-- Category Filter -->
-  <view class="filter-container">
-    <text class="filter-label">{{uiText.filterLabel}}</text>
-    <view class="filter-options">
+  <!-- Category Selection -->
+  <view class="swab-categories" wx:if="{{!loading}}">
+    <view class="swab-categories-header">
+      <text class="swab-categories-title">{{language === 'en' ? '✨ Or Generate Your Own Article' : '✨ 选择主题来生成文章'}}</text>
+      <text class="swab-categories-subtitle">{{language === 'en' ? 'Choose a category or enter a custom topic below' : '在下方选择分类或输入自定义主题来生成文章'}}</text>
+    </view>
+    <view class="swab-category-list">
       <view
-        class="filter-option {{selectedCategory === 'all' || selectedCategory === 'random' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'all' || selectedCategory === 'random' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="all"
       >
         {{uiText.categories.all}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'fly tying' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'fly tying' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="fly tying"
       >
         {{uiText.categories['fly tying']}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'fly casting' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'fly casting' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="fly casting"
       >
         {{uiText.categories['fly casting']}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'biology' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'biology' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="biology"
       >
         {{uiText.categories.biology}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'gear' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'gear' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="gear"
       >
         {{uiText.categories.gear}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'conservation' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'conservation' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="conservation"
       >
         {{uiText.categories.conservation}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'orvis' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'orvis' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="orvis"
       >
         {{uiText.categories.orvis}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'winston' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'winston' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="winston"
       >
         {{uiText.categories.winston}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'sage' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'sage' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="sage"
       >
         {{uiText.categories.sage}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'redington' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'redington' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="redington"
       >
         {{uiText.categories.redington}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'rio' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'rio' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="rio"
       >
         {{uiText.categories.rio}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'scientific anglers' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'scientific anglers' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="scientific anglers"
       >
         {{uiText.categories['scientific anglers']}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'steelhead' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'steelhead' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="steelhead"
       >
         {{uiText.categories.steelhead}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'bass' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'bass' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="bass"
       >
         {{uiText.categories.bass}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'saltwater' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'saltwater' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="saltwater"
       >
         {{uiText.categories.saltwater}}
       </view>
       <view
-        class="filter-option {{selectedCategory === 'tenkara' ? 'active' : ''}}"
+        class="swab-category-chip {{selectedCategory === 'tenkara' ? 'active' : ''}}"
         bindtap="selectCategory"
         data-category="tenkara"
       >
@@ -225,48 +269,109 @@
     </view>
   </view>
 
-  <!-- Input Area (above Generate button) -->
-  <view class="input-area-container">
-    <input
-      class="category-input"
-      placeholder="{{uiText.placeholderCategory}}"
-      bindinput="onCategoryInput"
-      value="{{customCategory}}"
-      disabled="{{loading}}"
-    />
+  <!-- Custom Input -->
+  <view class="swab-input-section" wx:if="{{!loading}}">
+    <view class="swab-input-label">
+      <text class="input-label-text">{{language === 'en' ? '📝 Or Enter Custom Topic' : '📝 或输入自定义主题来生成文章'}}</text>
+    </view>
+    <view class="swab-input-wrapper">
+      <input
+        class="swab-input"
+        placeholder="{{uiText.placeholderCategory}}"
+        placeholder-class="swab-input-placeholder"
+        bindinput="onCategoryInput"
+        value="{{customCategory}}"
+        confirm-type="search"
+      />
+      <view class="swab-input-clear" wx:if="{{customCategory}}" bindtap="clearCustomCategory">✕</view>
+    </view>
+    <text class="swab-input-hint" wx:if="{{customCategory}}">
+      {{language === 'en' ? '✨ Custom topic: ' : '✨ 自定义主题: '}}{{customCategory}}
+    </text>
   </view>
 
-  <!-- Generate Button (at bottom) -->
-  <view class="button-container">
-    <button
-      wx:if="{{hasPreviousArticle}}"
-      class="back-btn"
-      bindtap="goBackToPrevious"
-      disabled="{{loading}}"
+  <!-- Bottom Action Bar -->
+  <view class="swab-bottom-bar">
+    <view class="swab-bar-content">
+      <!-- Nav Buttons -->
+      <view class="swab-nav-group" wx:if="{{!loading}}">
+        <view
+          wx:if="{{hasPreviousArticle}}"
+          class="swab-nav-btn"
+          bindtap="goBackToPrevious"
+        >
+          ←
+        </view>
+        <view
+          wx:if="{{hasNextArticle}}"
+          class="swab-nav-btn"
+          bindtap="goBackToNext"
+        >
+          →
+        </view>
+      </view>
+
+      <!-- Main Action -->
+      <block wx:if="{{!loading}}">
+        <view class="swab-generate-btn" bindtap="generateCard">
+          <text class="generate-text">{{uiText.generateBtn}}</text>
+        </view>
+      </block>
+
+      <!-- Split Actions -->
+      <block wx:if="{{loading}}">
+        <view class="swab-cancel-btn" bindtap="cancelGeneration">
+          <text class="cancel-text">{{uiText.cancelBtn}}</text>
+        </view>
+        <view class="swab-generating-btn">
+          <text class="generating-text">{{uiText.generating}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- Floating Tips Card -->
+  <view class="swab-tips-card-overlay" wx:if="{{showTipsCard}}" bindtap="closeTipsCard">
+    <view
+      class="swab-tips-card"
+      catchtap="stopPropagation"
+      bindtouchstart="handleTouchStart"
+      bindtouchmove="handleTouchMove"
+      bindtouchend="handleTouchEnd"
+      style="transform: translateX({{cardTranslateX}}rpx); opacity: {{cardOpacity}}; transition: transform 0.2s ease, opacity 0.2s ease;"
     >
-      {{uiText.backBtn}}
-    </button>
-    <button
-      wx:if="{{hasNextArticle}}"
-      class="next-btn"
-      bindtap="goBackToNext"
-      disabled="{{loading}}"
-    >
-      {{uiText.nextBtn}}
-    </button>
-    <button
-      wx:if="{{loading}}"
-      class="cancel-btn"
-      bindtap="cancelGeneration"
-    >
-      {{uiText.cancelBtn}}
-    </button>
-    <button
-      class="generate-btn"
-      bindtap="generateCard"
-      disabled="{{loading}}"
-    >
-      {{loading ? uiText.generating : uiText.generateBtn}}
-    </button>
+      <view class="swab-tips-card-header" style="background: {{currentFlashcardCategory.color}}">
+        <view class="swab-tips-card-left">
+          <text class="swab-tips-card-icon">{{currentFlashcardCategory.icon}}</text>
+          <text class="swab-tips-card-category">{{currentFlashcardCategory.label}}</text>
+        </view>
+        <view class="swab-tips-card-right">
+          <text class="swab-tips-card-counter">{{flashcardsViewed}} / {{flashcards.length}}</text>
+          <view class="swab-tips-card-close" bindtap="closeTipsCard">✕</view>
+        </view>
+      </view>
+
+      <view class="swab-tips-card-content">
+        <!-- Question Section -->
+        <view class="swab-flashcard-section">
+          <view class="swab-flashcard-label">{{uiText.question}}</view>
+          <text class="swab-tips-card-text">{{flashcards[currentTipIndex] && (language === 'en' ? (flashcards[currentTipIndex].question.en || flashcards[currentTipIndex].question.zh) : flashcards[currentTipIndex].question.zh)}}</text>
+        </view>
+
+        <!-- Answer Button -->
+        <view class="swab-answer-btn" bindtap="toggleAnswer">
+          <text class="swab-answer-btn-text">{{showAnswer ? uiText.hideAnswer : uiText.showAnswer}}</text>
+          <text class="swab-answer-btn-icon">{{showAnswer ? '▲' : '▼'}}</text>
+        </view>
+
+        <!-- Answer Section (Hidden by default) -->
+        <view class="swab-flashcard-answer {{showAnswer ? 'show' : ''}}" wx:if="{{showAnswer}}">
+          <view class="swab-flashcard-label">{{uiText.answer}}</view>
+          <text class="swab-tips-card-text swab-answer-text">{{flashcards[currentTipIndex] && (language === 'en' ? (flashcards[currentTipIndex].answer.en || flashcards[currentTipIndex].answer.zh) : flashcards[currentTipIndex].answer.zh)}}</text>
+        </view>
+      </view>
+
+      <view class="swab-tips-hint" style="background: {{currentFlashcardCategory.color}}20">{{language === 'en' ? '← Swipe to navigate →' : '← 滑动切换 →'}}</view>
+    </view>
   </view>
 </view>

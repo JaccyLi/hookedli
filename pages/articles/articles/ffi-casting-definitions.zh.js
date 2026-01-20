@@ -1,0 +1,394 @@
+// pages/articles/articles/ffi-casting-definitions.zh.js
+module.exports = `# FFI 飞钓抛投定义
+
+**更新日期: 2026年1月16日**
+
+## 简介
+
+这些抛投定义旨在帮助教练和其他对飞钓抛投有浓厚兴趣的人士更清晰地沟通。它们不一定旨在成为教学术语，我们当然尊重我们的同事使用他们认为适合其学生的术语的权利。这套单一的定义涵盖了所有飞钓竿的过头抛和锚定抛投。还提供了一些与飞钓抛投相关的物理术语,以帮助更深入地理解抛投。
+
+## 飞钓抛投
+
+使用柔性杠杆移动和展开具有重量的线来抛投假饵。
+
+## 线环
+
+### 线环 (Loop)
+飞钓主线在飞钓抛投过程中超过杆尖时所呈现的形状。
+
+### 毛钩腿 (Fly Leg)
+在线环中从毛钩到线环鼻的移动部分飞钓主线。
+
+### 竿腿 (Rod Leg)
+在线环中从杆尖到线环鼻的移动或静止部分飞钓主线。
+
+### 线环鼻 (Loop Nose)
+线环前端的弯曲部分飞钓主线,是毛钩腿和竿腿之间的过渡。
+
+## 毛钩腿形状
+
+### 直线毛钩腿 (Straight Fly Leg)
+从线环鼻到毛钩的飞钓主线和前导线相对没有弯曲的毛钩腿。
+
+![Casting_StraightFlyLegA.png](Casting_StraightFlyLegA.png)
+
+![Casting_StraightFlyLegB.png](Casting_StraightFlyLegB.png)
+
+### 凸形毛钩腿 (Convex Fly Leg)
+具有远离竿腿的圆顶形的毛钩腿。
+
+![Casting_Convex.png](Casting_Convex.png)
+
+### 凹形毛钩腿 (Concave Fly Leg)
+不直且一部分向竿腿下沉的毛钩腿。
+
+![Casting_Concave.png](Casting_Concave.png)
+
+### 拖尾线环 (Trailing Loop)
+毛钩腿不凹陷并与竿腿交叉的线环。
+
+### 追尾线环 (Tailing Loop)
+具有凹形毛钩腿的线环,其向竿腿下沉并与竿腿交叉。
+
+![Casting_TailingLoop.png](Casting_TailingLoop.png)
+
+### 下悬线环 (Under-Running Loop)
+毛钩腿在其竿腿下方展开的线环。
+
+![Casting_Underslung.png](Casting_Underslung.png)
+
+### 平面内线环 (In-Plane Loop)
+毛钩腿和竿腿在同一平面内的线环。
+
+![Casting_Plane_InPlaneLoop.png](Casting_Plane_InPlaneLoop.png)
+
+### 平面外线环 (Out-of-Plane Loop)
+毛钩腿和竿腿在不同平面内的线环。
+
+![Casting_Plane_OutOfPlaneLoop.png](Casting_Plane_OutOfPlaneLoop.png)
+
+## 飞钓抛投运动
+
+### 平移 (Translation)
+飞钓竿根部的线性位置变化。
+
+### 旋转 (Rotation)
+飞钓竿根部的角度位置变化。
+
+### 抛投行程 (Casting Stroke)
+足以形成线环的飞钓竿根部的旋转和/或平移。
+
+### 行程长度 (Stroke Length)
+在抛投行程中飞钓竿根部移动的距离。
+
+![Casting_StrokeLength.png](Casting_StrokeLength.png)
+
+### 抛投弧度 (Casting Arc)
+在抛投行程中飞钓竿根部的角度变化。
+
+![Casting_Arc.png](Casting_Arc.png)
+
+### 停止 (Stop)
+导致线环形成的飞钓竿减速动作。
+
+### 飞钓竿平面 (Rod Plane)
+在飞钓抛投过程中飞钓竿所经过的平面。
+
+### 杆尖路径 (Rod Tip Path)
+在飞钓抛投过程中杆尖所经过的直线或曲线路径。
+
+### 竿尖轨迹 (Tracking)
+在抛投行程中杆尖的横向路径。
+
+### 轨迹 (Trajectory)
+线环相对于地平线行进的方向。
+
+### 提起 (Lift)
+向上移动飞钓竿,为飞钓抛投中的下一个动作重新定位飞钓主线。
+
+### 跟进 (Follow-Through)
+在最后一次抛投后向前和向下移动飞钓竿。
+
+### 时机 (Timing)
+每个抛投动作(比如前抛)过渡到下一个动作(比如后抛)的时间点。
+
+### 节奏 (Tempo)
+一次抛投中的移动速率。
+
+### 暂停 (Pause)
+抛投行程之间的时间段。
+
+### 180 度原则(空气锚) (180 Degree Principle - Aerialized Casts)
+在每个抛投行程开始时,预期的杆尖路径和飞钓主线目标对齐(在一条直线上)。
+
+### 180 度原则(水面锚定抛投) (180 Degree Principle - Anchored Casts)
+最后一次抛投、D环和锚点与目标对齐(大概在一条直线上)。
+
+## 停顿期间的竿运动
+
+飞钓竿在抛投停顿期间的运动可以结合平移和转动完成。
+
+### 漂移/随动 (Drift)
+在抛投停顿期间期间,将杆尖朝当前抛投的方向移动一小段距离。
+
+![Casting_Drift.png](Casting_Drift.png)
+
+### 拖拽/偷跑 (Drag)
+在抛投停顿期间,将杆尖朝下一个抛投的方向移动。
+
+![Casting_Drag.png](Casting_Drag.png)
+
+### 偷跑错误 (Creep)
+导致抛投错误的拖拽。
+
+### 上/下 (Up/Down)
+在抛投停顿期间,将杆尖向上或向下移动。
+
+### 内/外 (In/Out)
+在抛投停顿期间,将杆尖向内(横向更靠近抛投者)或向外(更远)移动。
+
+## 抛投术语
+
+### 滞空抛投/过头抛 (Aerial/Overhead Cast)
+在最初的抬杆之后,进行空中的前抛和后抛,直到最终的最后一次抛投。
+
+### 假抛 (False Cast)
+一次前抛紧接着一次后抛,两次都保持在空中。
+
+### 悬线量 (Overhang)
+在抛投行程中,杆尖外面的走线/射线的长度。
+
+### P点 (Point P)
+杆尖垂下的飞钓主线首次接触水面的点。
+
+### 锚点 (Anchor)
+在D环底部,与水面接触的飞钓主线/前导线。
+
+### 锚定抛投 (Anchored Cast)
+一种后抛线环从杆尖下方通过,并形成一个锚点和一个D环的抛投方式。
+
+### 锚点位置 (Anchor Position)
+锚点相对于抛投者的位置和布局。
+
+### 跳锚 (Skipped Anchor)
+一种错误,锚点短暂形成后,在最后一次抛投前过早地离开水面并远离目标。
+
+### 脱锚 (Blown Anchor)
+一种错误,在最后一次抛投期间锚点过早地从水中脱离。
+
+### 堆积/坠毁锚 (Piled/Crashed Anchor)
+一种错误,锚点落在水面上,导致飞钓主线/前导线出现松弛。
+
+### 血腥L形锚 (Bloody L Anchor)
+一种错误,部分飞钓主线/前导线与锚点的其余部分形成大约直角。
+
+### 水平线降落 (Level Line Drop)
+在D环扫掠中的一种错误,导致飞钓主线/前导线平铺在水面上。
+
+### 沉坠 (Trunking)
+一种错误,在D环扫掠结束时,杆尖向下的移动导致锚点过长,P点位于抛投者身后。
+
+### Hooking
+一种错误,D环摆动到抛投者的周围和后方。
+
+### 连接点 (Connection Point)
+飞钓主线/前导线或飞钓主线/沉水头线的连接处。
+
+### D环 (D Loop)
+在锚定抛投中,杆尖和锚点之间的圆形后抛线环。也泛指锚定抛投中任何形状的后抛线环。
+
+### V形线环 (V Loop)
+在锚定抛投中,杆尖和锚点之间的尖形后抛线环。
+
+### D环扫掠 (D Loop Sweep)
+引发锚定抛投中后抛线环形成的抛投行程。
+
+### 置线动作 (Line Placement Move)
+在抬杆后立即进行的飞钓竿动作,目的是将飞钓主线恰当地放置在水面上,为随后的D环扫掠做准备。
+
+### 触水即走锚定抛投 (Touch and Go Anchor Cast)
+一种锚定抛投,在抬杆和D环扫掠后,飞钓主线/前导线首次重新接触水面。
+
+### 持续锚定抛投 (Sustained Anchor Cast)
+在D环扫掠前有一个置线动作的锚定抛投。
+
+### 顺流锚定抛投 (Downstream Anchor Cast)
+在流水中将锚点和D环置于抛投者下游的锚定抛投;或在静水中,将它们留在与抬杆前飞钓主线同侧的位置。
+
+### 逆流锚定抛投 (Upstream Anchor Cast)
+在流水中将锚点和D环置于抛投者上游的锚定抛投;或在静水中,将它们置于与抬杆前飞钓主线相反的一侧。
+
+### 上画圈 (Circle Up)
+连接D环扫掠和最后一次抛投的圆形向上动作,抛投者通过此动作进入关键位置。
+
+### 关键位置 (Key Position)
+抛投者开始最后一次抛投时的手和手臂位置。
+
+### 左岸 (River Left / Left Bank)
+面向下游时的河流左岸。
+
+### 右岸 (River Right / Right Bank)
+面向下游时的河流右岸。
+
+## 抛投和技巧
+
+### 最后一次抛投 (Delivery Cast)
+毛钩抛投的最后一次抛投行程,用于将毛钩送至目标点。
+
+### 控线 (Mends)
+在最后一次抛投停止后,通过飞钓竿移动来操控飞钓主线的布局。
+
+- **空中控线 (Aerial Mends)** — 在飞钓主线/前导线落水前进行控线。
+- **水中控线 (Water Mends)** — 在飞钓主线/前导线落水后进行控线。
+
+### 出线 (Shooting line)
+在停止动作后释放飞钓主线,以增加杆尖外的飞钓主线长度。
+
+### 滑线 (Slipping line)
+通过在抛投行程之前或之后释放飞钓主线并移动飞钓竿,来增加杆尖外的飞钓主线长度。
+
+### 直线呈现 (Straight Line Presentations)
+产生直线飞钓主线布局的抛投行程和/或控线。
+
+### 松线呈现 (Slack Line Presentations)
+产生松弛飞钓主线布局的抛投行程和/或控线。
+
+### 曲线呈现 (Curved Presentations)
+产生曲线飞钓主线布局的抛投行程和/或控线。
+
+### 拉线 (Hauling)
+
+- **单次拉线 (Single Haul)** — 在前抛或后抛行程中,通过导环拉动飞钓主线。
+- **双次拉线 (Double Haul)** — 在连续的抛投行程中,通过导环拉动飞钓主线,并在抛投停顿期间将线手收回至竿手附近。
+
+### 持续张力抛投 (Continuous Tension Cast)
+通过持续的飞钓竿移动来保持飞钓主线张力的抛投。
+
+### 椭圆/格贝特罗伊特/比利时/椭圆抛投 (Oval / Belgiian / Elliptical Cast)
+一种持续张力抛投,由一个相对水平的后抛飞钓竿平面形成,然后不停顿地过渡到前抛时更垂直的飞钓竿平面。
+
+### 滚抛 (Roll Cast)
+一种没有大幅方向改变的锚定抛投,包括抬杆、D环扫掠、上画圈和最后一次抛投,在此过程中毛钩直到最后一次抛投后才离开水面。
+
+### 转换抛投 (Switch Cast)
+一种没有大幅方向改变的触水即走锚定抛投,包括抬杆、D环扫掠、上画圈和最后一次抛投。
+
+### 斯佩抛投 (Spey Cast)
+一种带有方向改变的锚定抛投。
+
+### 单手斯佩 (Single Spey)
+一种带有方向改变的逆流触水即走锚定抛投,包括抬杆、飞钓主线重新定位动作,然后是D环扫掠、上画圈和最后一次抛投。
+
+### 双手斯佩 (Double Spey)
+一种带有方向改变的顺流持续锚定抛投,包括抬杆和逆流置线动作,随后是向下的飞钓竿移动,过渡到D环扫掠、上画圈和最后一次抛投。
+
+### 弹射抛投 (Snap Cast)
+一种带有方向改变的逆流持续锚定抛投,包括抬杆、一个置线动作(飞钓竿向上游移动然后反向向下游),随后是向上游的飞钓竿移动,过渡到D环扫掠、上画圈和最后一次抛投。
+
+- **C形弹射/圆形C/圆形斯佩 (Snap C / Circle C / Circle Spey)** — 一种弹射抛投,其置线动作包括飞钓竿向上游移动,然后以圆形路径反向向下游移动。
+- **T形弹射 (Snap T)** — 一种弹射抛投,其置线动作包括飞钓竿向上游移动,然后以相对直线的路径反向向下游移动。
+
+### 蛇滚 (Snake Roll)
+一种带有方向改变的顺流触水即走锚定抛投,包括一个朝向目标的圆形抬杆动作,然后过渡到D环扫掠、上画圈和最后一次抛投。
+
+### 佩里戳刺 (Perry Poke)
+一种飞钓竿动作,将松弛的飞钓主线引向抛投者前方水面,大致与目标方向一致,然后进行D环扫掠、上画圈和最后一次抛投。
+
+## 飞钓抛投的物理术语
+
+我们邀请寻求更深技术理解的教练和其他飞钓抛投学员探索由 FFI 飞钓抛投力学和定义团队开发的这个继续教育资源。鼓励认证候选人熟悉考试中出现的术语。
+
+### 速度 (Speed)
+物体移动的速度。
+
+### 速度 (Velocity)
+速度与物体运动方向的组合。
+
+### 加速度 (Acceleration)
+速度随时间变化率。它可以是正、负或零。
+
+### 正加速度 (Positive Acceleration)
+物体速度的增加。通常被称为加速度。
+
+### 负加速度或减速度 (Negative Acceleration / Deceleration)
+物体速度的减小。
+
+### 恒定加速度 (Constant Acceleration)
+随时间以相同速率变化的速度。
+
+### 恒定速度 (Constant Velocity)
+加速度为零。
+
+### 力 (Force)
+对物体的推或拉。
+
+### 扭矩 (Torque)
+可以使物体绕轴旋转的力。
+
+### 质量 (Mass)
+构成物体的物质或物质的数量。
+
+### 重量 (Weight)
+重力作用在质量上的结果。
+
+### 功 (Work)
+传递给物体或从物体传递的能量,计算为力乘以其作用的距离。
+
+### 能量 (Energy)
+物体做功的能力。能量的形式包括:
+
+- 势能或储存的能量
+- 动能或工作能量,计算为物体质量的一半乘以其速度的平方。
+
+### 动量 (Momentum)
+物体的动量是其质量乘以其速度。
+
+### 冲量 (Impulse)
+传递给物体或从物体传递的动量,计算为力乘以其作用的时间。
+
+### 功率 (Power)
+衡量做功或能量传递速率的量度,计算为单位时间内所做的功。
+
+### 牛顿运动定律 (Newton's Laws of Motion)
+
+**第一运动定律:惯性** — 物体将继续其当前的运动或静止状态,直到某个净力使其速度或运动方向发生变化。
+
+**第二运动定律:力** — 物体的加速度与作用在其上的净力成正比。表示为力等于质量乘以加速度。
+
+**第三运动定律:作用/反作用** — 对于每一个作用,都有一个大小相等、方向相反的反作用。
+
+## FFI 飞钓抛投定义团队
+
+**Bryan Martin** — MCI, THMCI 和 **Bruce Williams** — MCI, THMCI (定义团队联合主席)
+
+**Sekhar Bahadur** — MCI, THMCI
+**Mac Brown** — MCI
+**Mark Huber** — MCI, THMCI
+**Bob Young** — MCI
+
+感谢 FFI 飞钓抛投教育项目领导团队和我们的飞钓抛投定义审阅者:
+
+**Tomonori (Bill) Higashi** — MCI, THMCI
+**Willie Holmes** — MCI, THMCI
+**Tim Rajeff** — MCI, THMCI
+**Todd Somsel** — MCI, THMCI
+**Mark Surtees** — MCI
+
+特别感谢 **Bintoro Tedoriswoyo** — CI, THCI 提供图形和图表。
+
+## FFI 飞钓抛投力学团队
+
+**Sekhar Bahadur** — MCI, THMCI, 主席
+**John Bilotta** — MCI, THMCI
+**Vince Brandon** — CI
+**Mac Brown** — MCI
+**Craig Buckbee** — MCI
+**Willy George** — MCI, THMCI
+**Tomonori ("Bill") Higashi** — MCI, THMCI
+**Graeme Hird** — MCI
+**Lasse Karlsson** — MCI, THMCI
+**Malik Mazbouri** — CI
+**Bruce Richards** — MCI
+**Mark Surtees** — MCI
+
+**来源:** [Fly Fishers International](https://www.flyfishersinternational.org/Fly-Casting-Education/FFI-Fly-Casting-Definitions)`

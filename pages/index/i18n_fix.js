@@ -47,15 +47,15 @@ const i18n = {
     placeholderCategory: '输入自定义主题...',
     categories: {
       all: '随机',
-      'fly tying': '毛钩',
-      'fly casting': '抛投',
+      'fly tying': '毛钩绑制',
+      'fly casting': '飞钓抛投',
       'biology': '飞钓生物学',
       'gear': '装备',
       'conservation': '生态保护'
     },
     categoryLabels: {
-      'fly tying': '毛钩',
-      'fly casting': '抛投',
+      'fly tying': '毛钩绑制',
+      'fly casting': '飞钓抛投',
       'biology': '飞钓生物学',
       'gear': '装备',
       'conservation': '生态保护'

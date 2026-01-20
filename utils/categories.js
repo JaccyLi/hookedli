@@ -119,7 +119,7 @@ const categoryPrompts = {
     'gear': '飞钓装备技巧、设备评论和建议',
     'conservation': '飞钓保护、河流生态系统保护、可持续垂钓实践',
     'reading water': '读水技巧、识别鱼类栖息地、理解水流模式',
-    'presentation': '飞钓呈现技巧、无阻力漂移、准确修线',
+    'presentation': '飞钓呈现技巧、无阻力随挥、准确修线',
     'catch and release': '钓获放流最佳实践、正确鱼类处理、存活技巧',
     'match hatch': '钩饵匹配、昆虫识别、飞饵选择策略',
     'wading safety': '涉水安全技巧、河流穿越技巧、适当涉水装备',

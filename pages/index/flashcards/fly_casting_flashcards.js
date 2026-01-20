@@ -1,0 +1,349 @@
+// Fly Casting Flashcards Data
+// Converted from notebooklm/flashcards/fly_casting-flashcards.csv
+// Bilingual content with English and Chinese
+
+module.exports = {
+  flashcards: [
+    {
+      question: { en: "", zh: "什么是飞钓抛投（Fly Casting）？" },
+      answer: { en: "", zh: "使用柔性竿移动并展开具有重量的线，从而驱动假饵的动作。" }
+    },
+    {
+      question: { en: "", zh: "线环（Loop）的定义是什么？" },
+      answer: { en: "", zh: "飞钓主线在抛投过程中超过竿尖时所呈现的形状。" }
+    },
+    {
+      question: { en: "", zh: "什么是毛钩腿（Fly Leg）？" },
+      answer: { en: "", zh: "在线环中，从毛钩到线环鼻（Loop Nose）之间的移动部分。" }
+    },
+    {
+      question: { en: "", zh: "什么是竿腿（Rod Leg）？" },
+      answer: { en: "", zh: "在线环中，从竿尖到线环鼻（Loop Nose）之间的部分。" }
+    },
+    {
+      question: { en: "", zh: "线环鼻（Loop Nose）起什么作用？" },
+      answer: { en: "", zh: "作为线环前端的弯曲部分，连接并过渡毛钩腿与竿腿。" }
+    },
+    {
+      question: { en: "", zh: "什么是抛投行程（Casting Stroke）？" },
+      answer: { en: "", zh: "足以形成线环的飞钓竿根部的旋转或平移运动。" }
+    },
+    {
+      question: { en: "", zh: "平移（Translation）在抛投中指什么？" },
+      answer: { en: "", zh: "飞钓竿根部位置的线性位移。" }
+    },
+    {
+      question: { en: "", zh: "旋转（Rotation）在抛投中指什么？" },
+      answer: { en: "", zh: "飞钓竿根部角度的位置变化。" }
+    },
+    {
+      question: { en: "", zh: "抛投弧度（Casting Arc）的定义是什么？" },
+      answer: { en: "", zh: "在抛投行程中，飞钓竿根部旋转所形成的角度变化。" }
+    },
+    {
+      question: { en: "", zh: "行程长度（Stroke Length）的定义是什么？" },
+      answer: { en: "", zh: "在抛投行程中，飞钓竿根部移动的线性距离。" }
+    },
+    {
+      question: { en: "", zh: "什么是“停止”（Stop）动作？" },
+      answer: { en: "", zh: "飞钓竿的减速动作，直接导致线环的形成。" }
+    },
+    {
+      question: { en: "", zh: "什么是竿尖轨迹（Tracking）？" },
+      answer: { en: "", zh: "抛投行程中，竿尖在横向平面内经过的路径。" }
+    },
+    {
+      question: { en: "", zh: "轨迹（Trajectory）在抛投中代表什么？" },
+      answer: { en: "", zh: "线环相对于地平线行进的方向。" }
+    },
+    {
+      question: { en: "", zh: "空中锚定抛投的 180 度原则是什么？" },
+      answer: { en: "", zh: "预期竿尖路径、飞钓线与目标在每个行程开始时应在垂直和横向上对齐。" }
+    },
+    {
+      question: { en: "", zh: "水面锚定抛投的 180 度原则涉及哪三个要素的对齐？" },
+      answer: { en: "", zh: "最后一次抛投（Delivery Cast）、D 环（D Loop）和锚点（Anchor）。" }
+    },
+    {
+      question: { en: "", zh: "什么是随挥/随动（Drift）？" },
+      answer: { en: "", zh: "在停顿期间，将竿尖顺着当前抛投的方向继续移动。" }
+    },
+    {
+      question: { en: "", zh: "什么是偷跑（Creep）？" },
+      answer: { en: "", zh: "在停顿期间，竿尖错误地朝下一个抛投的方向移动，常导致抛投错误。" }
+    },
+    {
+      question: { en: "", zh: "锚点（Anchor）在锚定抛投中指什么？" },
+      answer: { en: "", zh: "在 D 环底部，与水面接触的飞钓线、前导线或毛钩。" }
+    },
+    {
+      question: { en: "", zh: "什么是最后一次抛投（Delivery Cast）？" },
+      answer: { en: "", zh: "将毛钩送至目标点的最终抛投行程。" }
+    },
+    {
+      question: { en: "", zh: "空中控线（Aerial Mends）发生的时机是什么？" },
+      answer: { en: "", zh: "在飞钓主线和前导线落水之前进行操控。" }
+    },
+    {
+      question: { en: "", zh: "双拉（Double Haul）的操作定义是什么？" },
+      answer: { en: "", zh: "在连续的抛投行程中拉动钓线，并在停顿期间将线手收回至竿手附近。" }
+    },
+    {
+      question: { en: "", zh: "持续张力抛投（Continuous Tension Cast）的核心特点是什么？" },
+      answer: { en: "", zh: "通过持续的竿身运动保持钓线张力，钓线在整个过程中不停止移动。" }
+    },
+    {
+      question: { en: "", zh: "滚抛（Roll Cast）中 D 环的大小对抛投有何影响？" },
+      answer: { en: "", zh: "D 环越大，钓线重量越大，产生的竿身负荷越高，抛投距离越远。" }
+    },
+    {
+      question: { en: "", zh: "滚抛中锚点位置（Anchor Position）的理想状态是什么？" },
+      answer: { en: "", zh: "锚点应尽可能靠后（靠近抛投者侧方），以形成最大的 D 环。" }
+    },
+    {
+      question: { en: "", zh: "滚抛中的“铁轨”原则（Railroad Tracks）是为了避免什么？" },
+      answer: { en: "", zh: "避免竿腿（Rod Leg）跨过毛钩腿（Fly Leg）导致钓线缠绕。" }
+    },
+    {
+      question: { en: "", zh: "滚抛操作的最后一步是什么？" },
+      answer: { en: "", zh: "向前抛投（Tip Cast）并跟随钓线向下（Follow-Through）。" }
+    },
+    {
+      question: { en: "", zh: "滚抛起竿（Roll Cast Pickup）的主要用途是什么？" },
+      answer: { en: "", zh: "将沉水线或重毛钩带到水面，或者消除水面松弛线以便快速再次抛投。" }
+    },
+    {
+      question: { en: "", zh: "伸展控线（Reach Mend）的主要目的是什么？" },
+      answer: { en: "", zh: "通过在钓线上游或下游制造角度，抵消水流拉力，实现无拖拽漂流。" }
+    },
+    {
+      question: { en: "", zh: "执行伸展控线（Reach Mend）时，动作的先后顺序是什么？" },
+      answer: { en: "", zh: "先进行最后一次抛投停止，然后横向伸展（Reach），最后压低竿尖（Down）。" }
+    },
+    {
+      question: { en: "", zh: "学习双拉（Double Haul）的基本前提是什么？" },
+      answer: { en: "", zh: "能够用单手保持 40 到 50 英尺钓线在空中形成良好的线环。" }
+    },
+    {
+      question: { en: "", zh: "双拉在长距离抛投时，拉线长度有什么变化？" },
+      answer: { en: "", zh: "持线量越多，拉线的行程应越长。" }
+    },
+    {
+      question: { en: "", zh: "双拉结束的最佳时机是什么？" },
+      answer: { en: "", zh: "拉线动作应与竿尖停止（Stop）动作同时结束。" }
+    },
+    {
+      question: { en: "", zh: "在改变方向抛投中，单次水面张力抛投的最大转向角度大约是多少？" },
+      answer: { en: "", zh: "大约 180 度正负 30 度。" }
+    },
+    {
+      question: { en: "", zh: "John Han 的快速换向法如何定位竿尖？" },
+      answer: { en: "", zh: "竿尖先指向新目标，然后横跨原钓线向后带，最后直接起竿抛投。" }
+    },
+    {
+      question: { en: "", zh: "蛇滚（Snake Roll）属于哪一类锚定抛投？" },
+      answer: { en: "", zh: "顺流触水即走锚定抛投（Downstream Touch and Go Anchor Cast）。" }
+    },
+    {
+      question: { en: "", zh: "什么是佩里戳刺（Perry Poke）？" },
+      answer: { en: "", zh: "一种在 D 环扫掠前，将松弛线引向目标方向水面的竿身动作。" }
+    },
+    {
+      question: { en: "", zh: "S 形/摆动抛投（Wiggle/Snake Cast）产生波浪大小取决于什么？" },
+      answer: { en: "", zh: "取决于竿尖摆动的幅度和速度。" }
+    },
+    {
+      question: { en: "", zh: "堆积抛投（Pile Cast）或倾倒抛投（Dump Cast）的用途是什么？" },
+      answer: { en: "", zh: "在毛钩附近制造大量松弛线，以在复杂水流中获得极长的无拖拽漂流。" }
+    },
+    {
+      question: { en: "", zh: "比利时/椭圆抛投（Belgian/Oval Cast）为什么适合重毛钩？" },
+      answer: { en: "", zh: "钓线始终保持运动，避免了毛钩在后抛末端产生的冲击负载（Shock）。" }
+    },
+    {
+      question: { en: "", zh: "在强风中抛投，线环（Loop）应保持什么状态？" },
+      answer: { en: "", zh: "保持极窄（Skinny）的线环，以提高切风效率。" }
+    },
+    {
+      question: { en: "", zh: "在顺风（Tailwind）抛投时，最忌讳的操作是什么？" },
+      answer: { en: "", zh: "在后抛行程中过度抛投（Over-cast），导致后部线环崩溃。" }
+    },
+    {
+      question: { en: "", zh: "在强风中追求准确性，钓线应在何时展开？" },
+      answer: { en: "", zh: "钓线应在尽可能贴近水面（Surface）时展开。" }
+    },
+    {
+      question: { en: "", zh: "快速抛投（Quick Cast）中，如何在准备阶段固定毛钩？" },
+      answer: { en: "", zh: "捏住毛钩的尾部或钩弯处（Bend of the hook），确保假饵向外甩出时不挂到自己。" }
+    },
+    {
+      question: { en: "", zh: "在船上进行快速抛投，为什么建议脱掉鞋子？" },
+      answer: { en: "", zh: "为了能够脚感察觉是否有线踩在脚下，防止缠绕。" }
+    },
+    {
+      question: { en: "", zh: "快速抛投在水中涉水时的持线技巧是什么？" },
+      answer: { en: "", zh: "将钓线折叠成大环，挂在持竿手的指缝（如小指下）中。" }
+    },
+    {
+      question: { en: "", zh: "远距离抛投中，延迟旋转（Delayed Rotation）的作用是什么？" },
+      answer: { en: "", zh: "增加行程末端的加速度，防止钓线因动力不足而堆积。" }
+    },
+    {
+      question: { en: "", zh: "什么是追尾线环（Tailing Loop）？" },
+      answer: { en: "", zh: "具有凹形毛钩腿的线环，其向下穿过并与竿腿交叉，常导致打结。" }
+    },
+    {
+      question: { en: "", zh: "导致追尾线环的常见动力因素是什么？" },
+      answer: { en: "", zh: "不恰当的力量施加，即在抛投行程末端突然猛然发力（Power Spike）。" }
+    },
+    {
+      question: { en: "", zh: "缩短的抛投弧度（Shortened Casting Arc）会导致什么后果？" },
+      answer: { en: "", zh: "会导致竿尖路径出现凹陷，从而产生追尾线环。" }
+    },
+    {
+      question: { en: "", zh: "强力曲线抛投（Overpowered Curve Cast）的动作要领是什么？" },
+      answer: { en: "", zh: "使用侧抛并在目标前方强力急停（Hard Stop），同时向上转动卷线器位置。" }
+    },
+    {
+      question: { en: "", zh: "弱力曲线抛投（Underpowered Curve Cast）如何操作？" },
+      answer: { en: "", zh: "不依靠冲击力，而是在最后一次向前抛投时，竿尖画圆或在大角度摆动下停止。" }
+    },
+    {
+      question: { en: "", zh: "在远距离抛投中，“随挥”（Drift）对力量传递有何帮助？" },
+      answer: { en: "", zh: "它增加了下一次抛投的行程长度，使竿身有更长的时间进行加速和弯曲。" }
+    },
+    {
+      question: { en: "", zh: "进行侧风抛投时，为了安全应选择哪侧肩膀抛投？" },
+      answer: { en: "", zh: "选择下风向肩膀（Off-shoulder），使风将钩子吹离身体。" }
+    },
+    {
+      question: { en: "", zh: "什么是跳锚（Skipped Anchor）错误？" },
+      answer: { en: "", zh: "锚点在最后一次抛投前过早离开水面并向后飞出。" }
+    },
+    {
+      question: { en: "", zh: "什么是血腥 L 形锚（Bloody L Anchor）？" },
+      answer: { en: "", zh: "由于换向不当，导致部分线与主锚点呈直角，产生巨大摩擦和能量损失。" }
+    },
+    {
+      question: { en: "", zh: "置线动作（Line Placement Move）通常发生在哪个动作之后？" },
+      answer: { en: "", zh: "通常紧接在抬杆（Lift）之后。" }
+    },
+    {
+      question: { en: "", zh: "什么是 V 形线环（V Loop）？" },
+      answer: { en: "", zh: "在锚定抛投中，由于高效拉紧钓线而在竿尖形成的尖形后抛环。" }
+    },
+    {
+      question: { en: "", zh: "什么是水平线降落（Level Line Drop）错误？" },
+      answer: { en: "", zh: "在扫掠 D 环时动作不当，导致整个线体平铺在水面上失去张力。" }
+    },
+    {
+      question: { en: "", zh: "为什么距离抛投需要更长的行程长度？" },
+      answer: { en: "", zh: "因为长线需要更大的能量，更长的路径能让力量施加更平滑且更持久。" }
+    },
+    {
+      question: { en: "", zh: "如果后抛线环出现凹陷，这属于哪种线环形状？" },
+      answer: { en: "", zh: "凹形毛钩腿（Concave Fly Leg），这是追尾线环的前兆。" }
+    },
+    {
+      question: { en: "", zh: "什么是下悬线环（Underslung Loop）？" },
+      answer: { en: "", zh: "毛钩腿在竿腿下方展开的线环。" }
+    },
+    {
+      question: { en: "", zh: "在风中抛投，为了保证准确性，应该如何调整轨迹（Trajectory）？" },
+      answer: { en: "", zh: "采用更向下的轨迹（Downward Trajectory），减少风力干扰时间。" }
+    },
+    {
+      question: { en: "", zh: "滚抛中如果出现极宽的线环（Wide Loop），原因通常是什么？" },
+      answer: { en: "", zh: "抛投弧度（Casting Arc）过大，或者竿尖停止位置太低。" }
+    },
+    {
+      question: { en: "", zh: "在双拉中，为了减少摩擦，拉线方向应该是怎样的？" },
+      answer: { en: "", zh: "应尽可能与飞钓竿保持平行（Parallel）。" }
+    },
+    {
+      question: { en: "", zh: "什么是拖拽/偷跑（Drag/Creep）？" },
+      answer: { en: "", zh: "在应有的停顿期间，过早地朝前移动飞钓竿，消耗了宝贵的有效行程。" }
+    },
+    {
+      question: { en: "", zh: "什么是触水即走锚定抛投（Touch and Go Anchor Cast）？" },
+      answer: { en: "", zh: "钓线在抬杆和扫掠后仅短暂触碰水面便立即进行前抛的动作。" }
+    },
+    {
+      question: { en: "", zh: "什么是持续锚定抛投（Sustained Anchor Cast）？" },
+      answer: { en: "", zh: "在 D 环扫掠前有明显的置线动作，锚点在水面停留时间较长。" }
+    },
+    {
+      question: { en: "", zh: "什么是顺流锚定抛投（Downstream Anchor Cast）？" },
+      answer: { en: "", zh: "将锚点和 D 环置于抛投者下游方向的抛投方式。" }
+    },
+    {
+      question: { en: "", zh: "什么是平面内线环（In-Plane Loop）？" },
+      answer: { en: "", zh: "毛钩腿和竿腿在同一个平面内运动，这是高效抛投的标志。" }
+    },
+    {
+      question: { en: "", zh: "什么是平面外线环（Out-of-Plane Loop）？" },
+      answer: { en: "", zh: "毛钩腿和竿腿不在同一个平面内，通常会导致能量散失或缠绕。" }
+    },
+    {
+      question: { en: "", zh: "什么是上画圈（Circle Up）动作？" },
+      answer: { en: "", zh: "连接 D 环扫掠与最后抛投的弧形上升动作。" }
+    },
+    {
+      question: { en: "", zh: "什么是关键位置（Key Position）？" },
+      answer: { en: "", zh: "抛投者准备开始最后一次向前抛投时的手部及手臂姿态。" }
+    },
+    {
+      question: { en: "", zh: "什么是出线（Shooting line）？" },
+      answer: { en: "", zh: "在停止动作后松开持线手，利用剩余动能增加抛投长度的操作。" }
+    },
+    {
+      question: { en: "", zh: "什么是滑线（Slipping line）？" },
+      answer: { en: "", zh: "在抛投行程前后通过主动松线来缓慢增加杆尖外的线量。" }
+    },
+    {
+      question: { en: "", zh: "什么是反手/交叉肩抛投（Cack-handed/Off-shoulder Cast）？" },
+      answer: { en: "", zh: "在身体非主用手一侧或对侧肩膀进行的抛投。" }
+    },
+    {
+      question: { en: "", zh: "什么是单手斯佩（Single Spey）？" },
+      answer: { en: "", zh: "一种带有方向改变的逆流触水即走（Touch and Go）锚定抛投。" }
+    },
+    {
+      question: { en: "", zh: "什么是双手斯佩（Double Spey）？" },
+      answer: { en: "", zh: "一种带有方向改变的顺流持续锚定（Sustained Anchor）抛投。" }
+    },
+    {
+      question: { en: "", zh: "什么是弹射抛投（Snap Cast）？" },
+      answer: { en: "", zh: "一种通过特定置线动作快速重置锚点位置的持续锚定抛投。" }
+    },
+    {
+      question: { en: "", zh: "在抛投力学中，功（Work）是如何计算的？" },
+      answer: { en: "", zh: "力乘以作用的距离（行程长度）。" }
+    },
+    {
+      question: { en: "", zh: "在抛投力学中，动能（Kinetic energy）的公式是什么？" },
+      answer: { en: "", zh: "二分之一质量乘以速度的平方 ($E_k = \\frac{1}{2}mv^2$)。" }
+    },
+    {
+      question: { en: "", zh: "什么是冲量（Impulse）？" },
+      answer: { en: "", zh: "力乘以作用的时间，代表传递给钓线的动量变化。" }
+    },
+    {
+      question: { en: "", zh: "什么是惯性定律（Inertia）在抛投中的体现？" },
+      answer: { en: "", zh: "钓线在未受力（如竿尖运动）前，会保持其静止或原有运动状态。" }
+    },
+    {
+      question: { en: "", zh: "抛投节奏（Tempo）指的是什么？" },
+      answer: { en: "", zh: "在一次完整抛投动作中各部分的移动速率。" }
+    },
+    {
+      question: { en: "", zh: "什么是跟进（Follow-Through）？" },
+      answer: { en: "", zh: "在最后一次抛投停止后，竿尖顺势向前下方的轻微移动。" }
+    },
+    {
+      question: { en: "", zh: "什么是悬线量（Overhang）？" },
+      answer: { en: "", zh: "在抛投时，竿尖外多出的走线（Running line）部分。" }
+    }
+  ],
+  category: 'casting'
+}

@@ -1,0 +1,82 @@
+<!-- pages/articles/articles.wxml -->
+<view class="articles-container">
+  <!-- Header -->
+  <view class="articles-header">
+    <view class="articles-nav">
+      <view class="articles-back-btn" bindtap="goBack">
+        ← {{uiText.back}}
+      </view>
+    </view>
+    <text class="articles-title" wx:if="{{!showArticleDetail}}">{{uiText.title}}</text>
+    <text class="articles-subtitle" wx:if="{{!showArticleDetail}}">{{uiText.subtitle}}</text>
+  </view>
+
+  <!-- Loading State -->
+  <view class="articles-loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">{{language === 'en' ? 'Loading articles...' : '加载文章中...'}}</text>
+  </view>
+
+  <!-- Articles List -->
+  <view class="articles-content" wx:if="{{!loading && !showArticleDetail}}">
+    <view
+      class="article-card"
+      wx:for="{{articles}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="openArticle"
+    >
+      <image class="article-card-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
+
+      <view class="article-card-body">
+        <view class="article-card-tags">
+          <view
+            class="article-card-tag"
+            wx:for="{{item.tags}}"
+            wx:for-item="tag"
+            wx:key="*this"
+            style="background-color: {{item.tagColors[tag]}};"
+          >
+            {{tag}}
+          </view>
+        </view>
+
+        <text class="article-card-title">{{item.title[language]}}</text>
+        <text class="article-card-summary">{{item.summary[language]}}</text>
+
+        <view class="article-card-footer">
+          <text class="article-card-time">{{item.readTime[language]}}</text>
+          <text class="article-card-arrow">{{uiText.readMore}} →</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Article Detail View -->
+  <view class="article-detail" wx:if="{{!loading && showArticleDetail && currentArticle}}">
+    <view class="article-detail-header">
+      <image class="article-detail-hero" src="{{currentArticle.imageUrl}}" mode="aspectFill"></image>
+      <view class="article-detail-hero-overlay"></view>
+      <view class="article-detail-title-wrapper">
+        <view class="article-detail-tags">
+          <view
+            class="article-detail-tag"
+            wx:for="{{currentArticle.tags}}"
+            wx:for-item="tag"
+            wx:key="*this"
+            style="background-color: {{currentArticle.tagColors[tag]}};"
+          >
+            {{tag}}
+          </view>
+        </view>
+        <text class="article-detail-title">{{currentArticle.title[language]}}</text>
+        <text class="article-detail-meta">{{currentArticle.readTime[language]}}</text>
+      </view>
+      <view class="article-detail-close" bindtap="closeArticle">✕</view>
+    </view>
+
+    <view class="article-detail-content">
+      <rich-text nodes="{{currentArticle.content[language]}}" />
+    </view>
+  </view>
+</view>
