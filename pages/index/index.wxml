@@ -346,7 +346,7 @@
           <text class="swab-tips-card-category">{{currentFlashcardCategory.label}}</text>
         </view>
         <view class="swab-tips-card-right">
-          <text class="swab-tips-card-counter">{{flashcardsViewed}} / {{flashcards.length}}</text>
+          <text class="swab-tips-card-counter">{{currentTipIndex + 1}} / {{flashcards.length}}</text>
           <view class="swab-tips-card-close" bindtap="closeTipsCard">✕</view>
         </view>
       </view>
