@@ -92,6 +92,7 @@ Page({
     showTipsCard: false,
     currentTipIndex: 0,
     lastTipIndex: -1,
+    displayTipIndex: 0,
     flashcards: [],
     flashcardCategories: {},
     currentFlashcardCategory: {
@@ -277,6 +278,7 @@ Page({
           showTipsCard: true,
           currentTipIndex: 0,
           lastTipIndex: 0,
+          displayTipIndex: 0,
           flashcards: cards,
           showAnswer: false
         }, () => {
@@ -305,10 +307,12 @@ Page({
         showTipsCard: true,
         currentTipIndex: randomIndex,
         lastTipIndex: randomIndex,
+        displayTipIndex: randomIndex,
         flashcards: cards,
         showAnswer: false
       }, () => {
         console.log('[generateJoke] setData completed, currentTipIndex is now:', this.data.currentTipIndex)
+        console.log('[generateJoke] displayTipIndex is now:', this.data.displayTipIndex)
         this.updateFlashcardStyle()
       })
     } catch (error) {
