@@ -100,6 +100,27 @@
     </radio-group>
   </view>
 
+  <!-- Debug Mode Section -->
+  <view class="unified-section" style="margin-top: 24rpx;">
+    <view class="section-header">
+      <text class="section-title">{{language === 'en' ? 'Debug Mode' : '调试模式'}}</text>
+      <text class="section-desc">{{language === 'en' ? 'Enable detailed logging for development' : '启用详细日志用于开发'}}</text>
+    </view>
+
+    <view class="debug-mode-card">
+      <view class="debug-mode-content">
+        <view class="debug-mode-info">
+          <text class="debug-mode-icon">{{debugMode ? '🐛' : '🔒'}}</text>
+          <view class="debug-mode-text">
+            <text class="debug-mode-title">{{debugMode ? (language === 'en' ? 'Debug Mode Enabled' : '调试模式已开启') : (language === 'en' ? 'Production Mode' : '生产模式')}}</text>
+            <text class="debug-mode-desc">{{debugMode ? (language === 'en' ? 'Detailed logs will appear in console' : '控制台将显示详细日志') : (language === 'en' ? 'Only errors and warnings will be logged' : '仅记录错误和警告')}}</text>
+          </view>
+        </view>
+        <switch checked="{{debugMode}}" bindchange="onDebugModeChange" color="#FF6B6B" />
+      </view>
+    </view>
+  </view>
+
   <!-- Back Button -->
   <view class="button-container">
     <button class="back-btn" bindtap="goBack">

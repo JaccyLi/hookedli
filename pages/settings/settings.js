@@ -1,7 +1,8 @@
 Page({
   data: {
     selectedModel: 'deepseek-chat',
-    language: 'en'
+    language: 'en',
+    debugMode: false
   },
 
   onLoad() {
@@ -9,10 +10,12 @@ Page({
 
     const savedModel = wx.getStorageSync('selectedModel')
     const savedLanguage = app.globalData.language || 'en'
+    const savedDebugMode = wx.getStorageSync('debugMode') || false
 
     this.setData({
       selectedModel: savedModel || 'deepseek-chat',
-      language: savedLanguage
+      language: savedLanguage,
+      debugMode: savedDebugMode
     })
   },
 
@@ -32,6 +35,23 @@ Page({
 
     wx.showToast({
       title: this.data.language === 'en' ? `Switched to ${modelNames[model].en}` : `已切换到${modelNames[model].zh}`,
+      icon: 'success',
+      duration: 2000
+    })
+  },
+
+  onDebugModeChange(e) {
+    const debugMode = e.detail.value
+    this.setData({ debugMode })
+
+    const app = getApp()
+    app.globalData.debugMode = debugMode
+    wx.setStorageSync('debugMode', debugMode)
+
+    wx.showToast({
+      title: this.data.language === 'en'
+        ? (debugMode ? 'Debug mode enabled' : 'Debug mode disabled')
+        : (debugMode ? '调试模式已开启' : '调试模式已关闭'),
       icon: 'success',
       duration: 2000
     })

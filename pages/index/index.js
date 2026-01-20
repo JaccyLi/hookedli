@@ -5,6 +5,7 @@ const flyCastingFlashcardsModule = require('./flashcards/fly_casting_flashcards.
 const distanceCastingFlashcardsModule = require('./flashcards/distance_casting_flashcards.js')
 const slacklinePresentationFlashcardsModule = require('./flashcards/slackline_presentation_flashcards.js')
 const articlesList = require('../articles/articles-list.js')
+const logger = require('../../utils/logger.js')
 
 const generateArticleOutline = bigModelModule.generateArticleOutline
 const expandSection = bigModelModule.expandSection
@@ -253,16 +254,16 @@ Page({
   },
 
   generateJoke() {
-    console.log('[generateJoke] ========== START ==========')
-    console.log('[generateJoke] Current lastTipIndex:', this.data.lastTipIndex)
-    console.log('[generateJoke] Current currentTipIndex:', this.data.currentTipIndex)
+    logger.log('[generateJoke] ========== START ==========')
+    logger.log('[generateJoke] Current lastTipIndex:', this.data.lastTipIndex)
+    logger.log('[generateJoke] Current currentTipIndex:', this.data.currentTipIndex)
 
     try {
       const cards = flashcards || []
-      console.log('[generateJoke] Loaded flashcards count:', cards.length)
+      logger.log('[generateJoke] Loaded flashcards count:', cards.length)
 
       if (cards.length === 0) {
-        console.error('[generateJoke] No flashcards found in data')
+        logger.error('[generateJoke] No flashcards found in data')
         wx.showToast({
           title: this.data.language === 'en' ? 'No flashcards available' : '没有可用闪卡',
           icon: 'none'
@@ -272,7 +273,7 @@ Page({
 
       // Only one card exists, just show it
       if (cards.length === 1) {
-        console.log('[generateJoke] Only 1 card, showing index 0')
+        logger.log('[generateJoke] Only 1 card, showing index 0')
         this.setData({
           showTipsCard: true,
           currentTipIndex: 0,
@@ -292,14 +293,14 @@ Page({
 
       do {
         randomIndex = Math.floor(Math.random() * cards.length)
-        console.log(`[generateJoke] Attempt ${attempts + 1}: Generated random index ${randomIndex}`)
+        logger.log(`[generateJoke] Attempt ${attempts + 1}: Generated random index ${randomIndex}`)
         attempts++
       } while (randomIndex === this.data.lastTipIndex && attempts < maxAttempts)
 
-      console.log('[generateJoke] ========== FINAL RESULT ==========')
-      console.log('[generateJoke] Selected random flashcard index:', randomIndex)
-      console.log('[generateJoke] Previous index was:', this.data.lastTipIndex)
-      console.log('[generateJoke] Attempts needed:', attempts)
+      logger.log('[generateJoke] ========== FINAL RESULT ==========')
+      logger.log('[generateJoke] Selected random flashcard index:', randomIndex)
+      logger.log('[generateJoke] Previous index was:', this.data.lastTipIndex)
+      logger.log('[generateJoke] Attempts needed:', attempts)
 
       this.setData({
         showTipsCard: true,
@@ -308,11 +309,11 @@ Page({
         flashcards: cards,
         showAnswer: false
       }, () => {
-        console.log('[generateJoke] setData completed, currentTipIndex is now:', this.data.currentTipIndex)
+        logger.log('[generateJoke] setData completed, currentTipIndex is now:', this.data.currentTipIndex)
         this.updateFlashcardStyle()
       })
     } catch (error) {
-      console.error('[generateJoke] Error loading flashcards:', error)
+      logger.error('[generateJoke] Error loading flashcards:', error)
       wx.showToast({
         title: this.data.language === 'en' ? 'Error loading flashcards' : '加载闪卡失败',
         icon: 'none'

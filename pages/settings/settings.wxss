@@ -429,3 +429,54 @@
 button, .model-card {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Debug Mode Section */
+.debug-mode-card {
+  background: #ffffff;
+  border: 4rpx solid #000000;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.debug-mode-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.debug-mode-info {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  flex: 1;
+}
+
+.debug-mode-icon {
+  font-size: 48rpx;
+  line-height: 1;
+}
+
+.debug-mode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.debug-mode-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: 0.5rpx;
+}
+
+.debug-mode-desc {
+  font-size: 24rpx;
+  color: #666666;
+  line-height: 1.4;
+}
+
+/* Switch styling */
+switch {
+  transform: scale(0.9);
+}
