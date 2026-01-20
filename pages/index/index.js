@@ -113,13 +113,15 @@ Page({
 
     const navigationHistory = wx.getStorageSync('navigationHistory') || []
     const articleCount = articlesList.getArticleCount()
+    const savedFlashcardsViewed = wx.getStorageSync('flashcardsViewed') || 0
 
     this.setData({
       language: savedLanguage,
       loadingText: i18n[savedLanguage].loadingText,
       navigationHistory: navigationHistory,
       currentArticleIndex: navigationHistory.length - 1,
-      articleCount: articleCount
+      articleCount: articleCount,
+      flashcardsViewed: savedFlashcardsViewed
     })
 
     this.updateUIText()
@@ -270,11 +272,13 @@ Page({
 
       // Only one card exists, just show it
       if (cards.length === 1) {
+        const newCount = this.data.flashcardsViewed + 1
+        wx.setStorageSync('flashcardsViewed', newCount)
         this.setData({
           showTipsCard: true,
           currentTipIndex: 0,
           lastTipIndex: 0,
-          flashcardsViewed: this.data.flashcardsViewed + 1,
+          flashcardsViewed: newCount,
           flashcards: cards,
           showAnswer: false
         }, () => {
@@ -294,12 +298,15 @@ Page({
       } while (randomIndex === this.data.lastTipIndex && attempts < maxAttempts)
 
       console.log('[generateJoke] Selected flashcard index:', randomIndex, '(attempts:', attempts + ')')
+      console.log('[generateJoke] Flashcards viewed:', this.data.flashcardsViewed, '→', this.data.flashcardsViewed + 1)
 
+      const newCount = this.data.flashcardsViewed + 1
+      wx.setStorageSync('flashcardsViewed', newCount)
       this.setData({
         showTipsCard: true,
         currentTipIndex: randomIndex,
         lastTipIndex: randomIndex,
-        flashcardsViewed: this.data.flashcardsViewed + 1,
+        flashcardsViewed: newCount,
         flashcards: cards,
         showAnswer: false
       }, () => {
