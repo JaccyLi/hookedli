@@ -92,7 +92,6 @@ Page({
     showTipsCard: false,
     currentTipIndex: 0,
     lastTipIndex: -1,
-    flashcardsViewed: 0,
     flashcards: [],
     flashcardCategories: {},
     currentFlashcardCategory: {
@@ -113,15 +112,13 @@ Page({
 
     const navigationHistory = wx.getStorageSync('navigationHistory') || []
     const articleCount = articlesList.getArticleCount()
-    const savedFlashcardsViewed = wx.getStorageSync('flashcardsViewed') || 0
 
     this.setData({
       language: savedLanguage,
       loadingText: i18n[savedLanguage].loadingText,
       navigationHistory: navigationHistory,
       currentArticleIndex: navigationHistory.length - 1,
-      articleCount: articleCount,
-      flashcardsViewed: savedFlashcardsViewed
+      articleCount: articleCount
     })
 
     this.updateUIText()
@@ -256,7 +253,10 @@ Page({
   },
 
   generateJoke() {
-    console.log('[generateJoke] Loading fly fishing flashcards...')
+    console.log('[generateJoke] ========== START ==========')
+    console.log('[generateJoke] Current lastTipIndex:', this.data.lastTipIndex)
+    console.log('[generateJoke] Current currentTipIndex:', this.data.currentTipIndex)
+
     try {
       const cards = flashcards || []
       console.log('[generateJoke] Loaded flashcards count:', cards.length)
@@ -272,13 +272,11 @@ Page({
 
       // Only one card exists, just show it
       if (cards.length === 1) {
-        const newCount = this.data.flashcardsViewed + 1
-        wx.setStorageSync('flashcardsViewed', newCount)
+        console.log('[generateJoke] Only 1 card, showing index 0')
         this.setData({
           showTipsCard: true,
           currentTipIndex: 0,
           lastTipIndex: 0,
-          flashcardsViewed: newCount,
           flashcards: cards,
           showAnswer: false
         }, () => {
@@ -290,26 +288,27 @@ Page({
       // Keep selecting random index until we get a different card from the last one
       let randomIndex
       let attempts = 0
-      const maxAttempts = 10 // Safety limit to prevent infinite loop
+      const maxAttempts = 50 // Increased attempts for better randomness
 
       do {
         randomIndex = Math.floor(Math.random() * cards.length)
+        console.log(`[generateJoke] Attempt ${attempts + 1}: Generated random index ${randomIndex}`)
         attempts++
       } while (randomIndex === this.data.lastTipIndex && attempts < maxAttempts)
 
-      console.log('[generateJoke] Selected flashcard index:', randomIndex, '(attempts:', attempts + ')')
-      console.log('[generateJoke] Flashcards viewed:', this.data.flashcardsViewed, '→', this.data.flashcardsViewed + 1)
+      console.log('[generateJoke] ========== FINAL RESULT ==========')
+      console.log('[generateJoke] Selected random flashcard index:', randomIndex)
+      console.log('[generateJoke] Previous index was:', this.data.lastTipIndex)
+      console.log('[generateJoke] Attempts needed:', attempts)
 
-      const newCount = this.data.flashcardsViewed + 1
-      wx.setStorageSync('flashcardsViewed', newCount)
       this.setData({
         showTipsCard: true,
         currentTipIndex: randomIndex,
         lastTipIndex: randomIndex,
-        flashcardsViewed: newCount,
         flashcards: cards,
         showAnswer: false
       }, () => {
+        console.log('[generateJoke] setData completed, currentTipIndex is now:', this.data.currentTipIndex)
         this.updateFlashcardStyle()
       })
     } catch (error) {
