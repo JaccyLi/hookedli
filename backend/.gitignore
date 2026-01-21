@@ -43,3 +43,10 @@ build/
 # Temporary files
 tmp/
 temp/
+
+# SSL Certificates (NEVER commit these!)
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+ssl/*.csr
+!ssl/.gitkeep

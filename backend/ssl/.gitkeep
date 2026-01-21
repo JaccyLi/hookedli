@@ -1,0 +1,95 @@
+# SSL Certificates Directory
+
+This directory contains SSL certificate files for HTTPS support.
+
+## For Local Development (Self-Signed Certificates)
+
+Generate self-signed certificates by running:
+```bash
+npm run generate-cert
+```
+
+This will create:
+- `key.pem` - Private key
+- `cert.pem` - Self-signed certificate
+
+## For Production (Let's Encrypt)
+
+Use Let's Encrypt to obtain free SSL certificates:
+
+1. Point your domain to this server
+2. Run: `npm run setup-ssl`
+3. Follow the interactive prompts
+
+## Security Warning
+
+⚠️ **NEVER commit SSL certificate files to version control!**
+
+- Private keys should NEVER be shared
+- Certificates can be regenerated if needed
+- This directory is gitignored (except this .gitkeep file)
+
+## Certificate Files
+
+- `key.pem` - Private key (keep secret!)
+- `cert.pem` - SSL certificate
+- `chain.pem` - Certificate chain (optional, for Let's Encrypt)
+
+## After Generating Certificates
+
+1. Add to `.env` file:
+   ```
+   SSL_KEY_PATH=./ssl/key.pem
+   SSL_CERT_PATH=./ssl/cert.pem
+   ```
+
+2. Restart server:
+   ```bash
+   npm start
+   ```
+
+3. Access via HTTPS:
+   ```
+   https://localhost:3443/api/health
+   ```
+
+## Certificate Validation
+
+**Local Development:**
+- Browsers will show security warnings
+- This is NORMAL for self-signed certificates
+- Click "Advanced" → "Proceed to localhost" to continue
+
+**Production (Let's Encrypt):**
+- No security warnings
+- Trusted by all browsers
+- Auto-renewal configured
+
+## Troubleshooting
+
+**Port 3443 already in use:**
+```bash
+# Find process using the port
+lsof -i :3443
+
+# Kill the process
+kill -9 <PID>
+```
+
+**Certificate expired:**
+```bash
+# Regenerate self-signed cert
+npm run generate-cert
+```
+
+**Let's Encrypt certificate expiring:**
+```bash
+# Renew certificate
+sudo certbot renew
+```
+
+## Resources
+
+- [Let's Encrypt](https://letsencrypt.org/)
+- [OpenSSL Documentation](https://www.openssl.org/docs/)
+- [Mozilla SSL Configuration Generator](https://ssl-config.mozilla.org/)

@@ -1,9 +1,14 @@
 /**
  * HookedLee Backend Server
  * Securely proxies AI API requests and manages API keys
+ * HTTPS Support with SSL Certificates
  */
 
 require('dotenv').config()
+const https = require('https')
+const http = require('http')
+const fs = require('fs')
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
@@ -12,7 +17,8 @@ const rateLimit = require('express-rate-limit')
 const axios = require('axios')
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const HTTP_PORT = process.env.HTTP_PORT || 3000
+const HTTPS_PORT = process.env.HTTPS_PORT || 3443
 
 // ========== MIDDLEWARE ==========
 
@@ -67,7 +73,9 @@ app.get('/api/health', (req, res) => {
     models: {
       bigmodel: !!API_KEYS.BIGMODEL,
       deepseek: !!API_KEYS.DEEPSEEK
-    }
+    },
+    protocol: req.protocol,
+    secure: req.secure
   })
 })
 
@@ -270,37 +278,151 @@ app.use((err, req, res, next) => {
   })
 })
 
-// ========== START SERVER ==========
+// ========== SSL CERTIFICATE OPTIONS ==========
 
-app.listen(PORT, () => {
+// SSL certificate paths
+const certPaths = {
+  key: process.env.SSL_KEY_PATH || path.join(__dirname, 'ssl', 'key.pem'),
+  cert: process.env.SSL_CERT_PATH || path.join(__dirname, 'ssl', 'cert.pem'),
+  ca: process.env.SSL_CA_PATH || path.join(__dirname, 'ssl', 'ca.pem')
+}
+
+// Check if SSL certificates exist
+const sslExists = fs.existsSync(certPaths.key) && fs.existsSync(certPaths.cert)
+
+// ========== CREATE HTTPS SERVER ==========
+
+let httpsServer = null
+
+if (sslExists) {
+  // SSL certificates found - start HTTPS server
+  try {
+    const httpsOptions = {
+      key: fs.readFileSync(certPaths.key),
+      cert: fs.readFileSync(certPaths.cert),
+      ca: fs.existsSync(certPaths.ca) ? fs.readFileSync(certPaths.ca) : undefined
+    }
+
+    httpsServer = https.createServer(httpsOptions, app)
+
+    httpsServer.listen(HTTPS_PORT, () => {
+      console.log('=================================')
+      console.log('🔒 HTTPS Server Started')
+      console.log('=================================')
+      console.log(`✓ HTTPS running on port ${HTTPS_PORT}`)
+      console.log(`✓ SSL certificates loaded`)
+      console.log(`✓ Certificate: ${certPaths.cert}`)
+      console.log(`✓ Key: ${certPaths.key}`)
+      console.log('=================================\n')
+    })
+
+    httpsServer.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${HTTPS_PORT} is already in use!`)
+        console.error('Please stop the other process or use a different port')
+      } else {
+        console.error('❌ HTTPS server error:', error)
+      }
+    })
+  } catch (error) {
+    console.error('❌ Failed to load SSL certificates:', error.message)
+    console.log('ℹ️  Falling back to HTTP only...')
+    console.log('ℹ️  See README.md for instructions on generating SSL certificates\n')
+  }
+} else {
+  // No SSL certificates - HTTP only
   console.log('=================================')
-  console.log('🚀 HookedLee Backend Server')
+  console.log('⚠️  SSL certificates not found')
   console.log('=================================')
-  console.log(`✓ Server running on port ${PORT}`)
-  console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`)
+  console.log('ℹ️  HTTPS server not started')
+  console.log('ℹ️  To enable HTTPS, follow these steps:')
+  console.log('')
+  console.log('For local development (self-signed cert):')
+  console.log('  npm run generate-cert')
+  console.log('')
+  console.log('For production (Let\'s Encrypt):')
+  console.log('  1. Point your domain to this server')
+  console.log('  2. Run: sudo certbot --nginx -d yourdomain.com')
+  console.log('  3. Update cert paths in .env')
+  console.log('')
+  console.log('=================================\n')
+}
+
+// ========== CREATE HTTP SERVER (redirects to HTTPS) ==========
+
+const httpServer = http.createServer((req, res) => {
+  // Redirect all HTTP traffic to HTTPS
+  if (sslExists) {
+    const httpsHost = req.headers.host.split(':')[0] // Remove port if present
+    const httpsUrl = `https://${httpsHost}:${HTTPS_PORT}${req.url}`
+    console.log(`[HTTP → HTTPS] Redirecting to: ${httpsUrl}`)
+
+    res.writeHead(301, {
+      Location: httpsUrl
+    })
+    res.end()
+  } else {
+    // No HTTPS available, serve HTTP directly
+    app(req, res)
+  }
+})
+
+httpServer.listen(HTTP_PORT, () => {
+  if (sslExists) {
+    console.log('=================================')
+    console.log('🌐 HTTP Server Started (Redirect Mode)')
+    console.log('=================================')
+    console.log(`✓ HTTP running on port ${HTTP_PORT}`)
+    console.log(`✓ Redirecting to HTTPS port ${HTTPS_PORT}`)
+  } else {
+    console.log('=================================')
+    console.log('🌐 HTTP Server Started (Development Mode)')
+    console.log('=================================')
+    console.log(`✓ HTTP running on port ${HTTP_PORT}`)
+    console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`)
+  }
   console.log(`✓ BigModel API: ${API_KEYS.BIGMODEL ? '✓ Configured' : '✗ Not configured'}`)
   console.log(`✓ DeepSeek API: ${API_KEYS.DEEPSEEK ? '✓ Configured' : '✗ Not configured'}`)
   console.log('=================================')
   console.log('\nAvailable endpoints:')
-  console.log('  GET  /api/health              - Health check')
-  console.log('  GET  /api/models             - List available models')
-  console.log('  POST /api/proxy/chat         - Unified chat proxy')
-  console.log('  POST /api/proxy/glm          - GLM-4.7 chat')
-  console.log('  POST /api/proxy/deepseek     - DeepSeek chat')
-  console.log('  POST /api/proxy/image        - Image generation')
+  console.log(`  HTTP:  http://localhost:${HTTP_PORT}/api/health`)
+  if (sslExists) {
+    console.log(`  HTTPS: https://localhost:${HTTPS_PORT}/api/health`)
+  }
   console.log('=================================\n')
+})
+
+httpServer.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${HTTP_PORT} is already in use!`)
+    console.error('Please stop the other process or use a different port')
+  } else {
+    console.error('❌ HTTP server error:', error)
+  }
 })
 
 // ========== GRACEFUL SHUTDOWN ==========
 
-process.on('SIGTERM', () => {
-  console.log('\n🛑 SIGTERM received, shutting down gracefully...')
-  process.exit(0)
-})
+const shutdown = () => {
+  console.log('\n🛑 Shutting down gracefully...')
 
-process.on('SIGINT', () => {
-  console.log('\n🛑 SIGINT received, shutting down gracefully...')
-  process.exit(0)
-})
+  httpServer.close(() => {
+    console.log('✓ HTTP server closed')
+  })
+
+  if (httpsServer) {
+    httpsServer.close(() => {
+      console.log('✓ HTTPS server closed')
+    })
+  }
+
+  setTimeout(() => {
+    console.log('✓ Goodbye!')
+    process.exit(0)
+  }, 1000)
+}
+
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
 
 module.exports = app
