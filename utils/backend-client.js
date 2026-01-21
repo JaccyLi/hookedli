@@ -196,12 +196,14 @@ async function expandSection(params) {
  * Generate image via backend
  * @param {string} prompt - Image generation prompt
  * @param {string} size - Image size
+ * @param {boolean} isHero - Whether this is a hero image (uses GLM-Image model)
  * @returns {Promise<string>} Image URL
  */
-async function generateImage(prompt, size = '1024x1024') {
+async function generateImage(prompt, size = '1024x1024', isHero = false) {
   const result = await makeBackendRequest('/api/proxy/image', {
     prompt: prompt,
-    size: size
+    size: size,
+    isHero: isHero
   })
 
   if (result.data && result.data.length > 0) {

@@ -193,7 +193,7 @@ app.post('/api/proxy/deepseek', async (req, res) => {
   }
 })
 
-// Proxy endpoint for image generation (BigModel CogView)
+// Proxy endpoint for image generation (BigModel CogView & GLM-Image)
 app.post('/api/proxy/image', async (req, res) => {
   try {
     if (!API_KEYS.BIGMODEL) {
@@ -202,12 +202,17 @@ app.post('/api/proxy/image', async (req, res) => {
       })
     }
 
-    const { prompt, size } = req.body
+    const { prompt, size, isHero } = req.body
+
+    // Use GLM-Image for hero images, CogView-4 for others
+    const model = isHero ? 'glm-image' : 'cogview-4-250304'
+
+    console.log('[Image Gen]', isHero ? 'Hero image' : 'Section image', 'using model:', model)
 
     const response = await axios.post(
       'https://open.bigmodel.cn/api/paas/v4/images/generations',
       {
-        model: 'cogview-3-flash',
+        model: model,
         prompt: prompt,
         size: size || '1024x1024'
       },
@@ -223,6 +228,11 @@ app.post('/api/proxy/image', async (req, res) => {
     res.json(response.data)
   } catch (error) {
     console.error('[Image Generation Error]:', error.message)
+    console.error('[Image Generation Error Details]:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data
+    })
     res.status(500).json({
       error: 'Failed to generate image',
       details: error.response?.data || error.message

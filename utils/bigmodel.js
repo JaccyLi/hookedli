@@ -638,24 +638,25 @@ Output ONLY valid JSON in this format:
 }
 
 /**
- * Generate an image using BigModel's CogView-3-Flash API
+ * Generate an image using BigModel's CogView API
  * @param {string} prompt - Image generation prompt
  * @param {string} apiKey - BigModel API key (deprecated, backend used when available)
+ * @param {boolean} isHero - Whether this is a hero image (uses GLM-Image model)
  * @returns {Promise<string>} Image URL
  */
-function generateImage(prompt, apiKey) {
+function generateImage(prompt, apiKey, isHero = false) {
   return new Promise(async (resolve, reject) => {
     try {
       let imageUrl = ''
 
       // Check if backend proxy is enabled
       const useBackend = backendClient.isBackendEnabled()
-      logger.log('[generateImage] Using backend:', useBackend)
+      logger.log('[generateImage] Using backend:', useBackend, 'isHero:', isHero)
 
       if (useBackend) {
         // Try backend proxy first
         try {
-          imageUrl = await backendClient.generateImage(prompt, AI.IMAGE_SIZE)
+          imageUrl = await backendClient.generateImage(prompt, AI.IMAGE_SIZE, isHero)
           logger.log('[generateImage] Backend success')
           resolve(imageUrl)
           return
@@ -666,8 +667,10 @@ function generateImage(prompt, apiKey) {
 
       // Fallback to direct API call if backend failed or was not enabled
       logger.log('[generateImage] Using direct API call')
+      // Use GLM-Image for hero, CogView-4 for others
+      const model = isHero ? 'glm-image' : 'cogview-4-250304'
       const requestPayload = {
-        model: 'cogview-3-flash',
+        model: model,
         prompt: prompt,
         size: AI.IMAGE_SIZE
       }
@@ -807,7 +810,8 @@ async function generateHeroImage(title, category, apiKey, onProgress = null) {
       })
     }
 
-    const imageUrl = await generateImage(prompt, apiKey)
+    // Pass isHero=true to use GLM-Image model
+    const imageUrl = await generateImage(prompt, apiKey, true)
 
     // Report completion
     if (onProgress) {
