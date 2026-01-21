@@ -93,6 +93,47 @@
     </radio-group>
   </view>
 
+  <!-- Backend Status Section -->
+  <view class="unified-section">
+    <!-- Section Header -->
+    <view class="section-header">
+      <text class="section-title">{{language === 'en' ? 'Backend Connection' : '后端连接'}}</text>
+      <text class="section-desc">{{language === 'en' ? 'AI services powered by secure backend' : 'AI服务由安全后端提供'}}</text>
+    </view>
+
+    <!-- Status Indicator -->
+    <view class="status-group">
+      <text class="status-label">{{language === 'en' ? 'Backend Status' : '后端状态'}}</text>
+      <view class="status-indicator {{backendConnected ? 'connected' : 'disconnected'}}">
+        <text class="status-dot"></text>
+        <text class="status-text">{{backendConnected ? (language === 'en' ? '✓ Connected' : '✓ 已连接') : (language === 'en' ? '✗ Disconnected' : '✗ 未连接')}}</text>
+      </view>
+    </view>
+
+    <!-- Backend URL Input -->
+    <view class="input-group">
+      <text class="input-label">{{language === 'en' ? 'Backend URL' : '后端地址'}}</text>
+      <input
+        class="api-input"
+        type="text"
+        placeholder="{{language === 'en' ? 'https://your-backend.com' : 'https://your-backend.com'}}"
+        value="{{backendUrl}}"
+        bindinput="onBackendUrlInput"
+      />
+    </view>
+
+    <!-- Connect Button -->
+    <button class="save-btn" bindtap="testBackendConnection">
+      <text>{{language === 'en' ? '🔍 Test Connection' : '🔍 测试连接'}}</text>
+    </button>
+
+    <!-- Help Tip -->
+    <view class="help-tip">
+      <text class="help-icon">🔒</text>
+      <text class="help-text">{{language === 'en' ? 'Your API keys are securely stored on the backend. The mini program never sees your keys.' : '您的API密钥安全存储在后端。小程序无法访问您的密钥。'}}</text>
+    </view>
+  </view>
+
   <!-- Back Button -->
   <view class="button-container">
     <button class="back-btn" bindtap="goBack">

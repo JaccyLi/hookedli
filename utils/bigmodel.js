@@ -1,11 +1,18 @@
 /**
  * Multi-Model API Integration Module
  * Supports BigModel GLM-4.7, DeepSeek-Chat, and DeepSeek-Reasoner APIs
+ * Can use backend proxy for secure API key management
  */
 
 const GLM_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
 const IMAGE_API_URL = 'https://open.bigmodel.cn/api/paas/v4/images/generations'
+
+// Import category data from central source
+const { categoryPrompts: categoryPromptsData, categoryLabels: categoryLabelsData } = require('./categories.js')
+const logger = require('./logger.js')
+const { AI, MODELS } = require('./constants.js')
+const backendClient = require('./backend-client.js')
 
 /**
  * Get API URL and key based on model selection
@@ -14,151 +21,25 @@ const IMAGE_API_URL = 'https://open.bigmodel.cn/api/paas/v4/images/generations'
  * @returns {Object} { url, key, model }
  */
 function getApiConfig(model, apiKeys) {
-  if (model === 'deepseek-chat') {
+  if (model === MODELS.DEEPSEEK_CHAT) {
     return {
       url: DEEPSEEK_API_URL,
       key: apiKeys.deepseekApiKey,
-      model: 'deepseek-chat'
+      model: MODELS.DEEPSEEK_CHAT
     }
-  } else if (model === 'deepseek-reasoner') {
+  } else if (model === MODELS.DEEPSEEK_REASONER) {
     return {
       url: DEEPSEEK_API_URL,
       key: apiKeys.deepseekApiKey,
-      model: 'deepseek-reasoner'
+      model: MODELS.DEEPSEEK_REASONER
     }
   } else {
     // Default to GLM-4.7
     return {
       url: GLM_API_URL,
       key: apiKeys.glmApiKey,
-      model: 'glm-4.7'
+      model: MODELS.GLM_4_7
     }
-  }
-}
-
-const categoryPromptsData = {
-  en: {
-    'fly tying': 'Fly tying patterns, techniques, and tutorials',
-    'fly casting': 'Fly casting techniques, tips for distance and accuracy',
-    'biology': 'Angling biology, understanding fish behavior and ecosystem dynamics',
-    'gear': 'Fly fishing gear tips, equipment reviews and recommendations',
-    'conservation': 'Fly fishing conservation, protecting river ecosystems, sustainable angling practices',
-    'reading water': 'Reading water techniques, identifying fish holding spots, understanding current patterns',
-    'presentation': 'Fly presentation techniques, drag-free drifts, accurate mends',
-    'catch and release': 'Catch and release best practices, proper fish handling, survival techniques',
-    'match hatch': 'Matching the hatch, insect identification, fly selection strategies',
-    'wading safety': 'Wading safety tips, river crossing techniques, proper wading gear',
-    'fly line': 'Fly line types, taper profiles, line selection, casting characteristics',
-    'fly rod': 'Fly rod actions, rod selection, casting mechanics, rod maintenance',
-    'etiquette': 'River etiquette, proper angler behavior, respecting other anglers',
-    'orvis': 'Orvis fly fishing brand, Orvis history, Orvis products and innovations',
-    'winston': 'Winston fly rods, Winston rod actions, Winston craftsmanship',
-    'sage': 'Sage fly rods, Sage rod actions, Sage casting performance, Sage fly fishing gear',
-    'redington': 'Redington fly rods, Redington fly fishing gear, Redington reels and accessories',
-    'rio': 'Rio fly lines, Rio fly fishing lines, Rio shooting heads, Rio leader materials',
-    'scientific anglers': 'Scientific Anglers fly lines, SA line technology, Scientific Anglers products',
-    'steelhead': 'Steelhead fishing, steelhead run fishing, steelhead fly fishing techniques',
-    'bass': 'Bass fly fishing, largemouth bass, smallmouth bass, warmwater fly fishing',
-    'saltwater': 'Saltwater fly fishing, saltwater flats, bonefish, permit, saltwater fly patterns',
-    'tenkara': 'Tenkara fishing, Japanese tenkara, tenkara rods, tenkara techniques',
-    'tfo': 'TFO fly fishing brand, TFO rods and gear, Temple Fork Outfitters',
-    'echo': 'Echo fly rods, Echo rod technologies, Echo casting performance',
-    'lefty kreh': 'Lefty Kreh fly fishing techniques, Lefty Kreh casting methods, Lefty Kreh legacy',
-    'steve rajeff': 'Steve Rajeff casting techniques, Steve Rajeff championship wins, Rajeff fishing methods',
-    'all': 'Fly fishing techniques, tips, and advice'
-  },
-  zh: {
-    'fly tying': '毛钩绑制模式、技术和教程',
-    'fly casting': '飞钓抛投技巧、距离和准确性的建议',
-    'biology': '飞钓生物学、理解鱼类行为和生态系统',
-    'gear': '飞钓装备技巧、设备评论和建议',
-    'conservation': '飞钓保护、河流生态系统保护、可持续垂钓实践',
-    'reading water': '读水技巧、识别鱼类栖息地、理解水流模式',
-    'presentation': '飞钓呈现技巧、无阻力随挥、准确修线',
-    'catch and release': '钓获放流最佳实践、正确鱼类处理、存活技巧',
-    'match hatch': '钩饵匹配、昆虫识别、飞饵选择策略',
-    'wading safety': '涉水安全技巧、河流穿越技巧、适当涉水装备',
-    'fly line': '飞钓主线类型、锥度轮廓、主线选择、抛投特性',
-    'fly rod': '飞钓竿动作、鱼竿选择、抛投力学、鱼竿维护',
-    'etiquette': '河流礼仪、正确垂钓行为、尊重其他垂钓者',
-    'orvis': 'Orvis飞钓品牌、Orvis历史、Orvis产品和创新',
-    'winston': 'Winston飞钓竿、Winston鱼竿动作、Winston工艺',
-    'sage': 'Sage飞钓竿、Sage鱼竿动作、Sage抛投性能、Sage飞钓装备',
-    'redington': 'Redington飞钓竿、Redington飞钓装备、Redington渔轮和配件',
-    'rio': 'Rio飞钓主线、Rio飞钓线、Rio抛投头、Rio子线材料',
-    'scientific anglers': 'Scientific Anglers飞钓主线、SA线技术、Scientific Anglers产品',
-    'steelhead': '钢头鳟钓鱼、钢头鳟洄游钓法、钢头鳟飞钓技术',
-    'bass': '鲈鱼飞钓、大口黑鲈、小口黑鲈、温水飞钓',
-    'saltwater': '海水飞钓、盐水浅滩、bonefish、permit、海水飞蝇模式',
-    'tenkara': '天展钓法、日本天展、天展竿、天展技术',
-    'tfo': 'TFO飞钓品牌、TFO鱼竿和装备、Temple Fork Outfitters',
-    'echo': 'Echo飞钓竿、Echo鱼竿技术、Echo抛投性能',
-    'lefty kreh': 'Lefty Kreh飞钓技巧、Lefty Kreh抛投方法、Lefty Kreh遗产',
-    'steve rajeff': 'Steve Rajeff抛投技巧、Steve Rajeff冠军胜利、Rajeff垂钓方法',
-    'all': '飞钓技术、技巧和建议'
-  }
-}
-
-const categoryLabelsData = {
-  en: {
-    'fly tying': 'Fly Tying',
-    'fly casting': 'Fly Casting',
-    'biology': 'Angling Biology',
-    'gear': 'Gear Tips',
-    'conservation': 'Conservation',
-    'reading water': 'Reading Water',
-    'presentation': 'Presentation',
-    'catch and release': 'Catch and Release',
-    'match hatch': 'Match the Hatch',
-    'wading safety': 'Wading Safety',
-    'fly line': 'Fly Line',
-    'fly rod': 'Fly Rod',
-    'etiquette': 'Etiquette',
-    'orvis': 'Orvis',
-    'winston': 'Winston',
-    'sage': 'Sage',
-    'redington': 'Redington',
-    'rio': 'Rio',
-    'scientific anglers': 'Scientific Anglers',
-    'steelhead': 'Steelhead',
-    'bass': 'Bass',
-    'saltwater': 'Saltwater',
-    'tenkara': 'Tenkara',
-    'tfo': 'TFO',
-    'echo': 'Echo',
-    'lefty kreh': 'Lefty Kreh',
-    'steve rajeff': 'Steve Rajeff',
-    'all': 'Fly Fishing'
-  },
-  zh: {
-    'fly tying': '毛钩绑制',
-    'fly casting': '飞钓抛投',
-    'biology': '飞钓生物学',
-    'gear': '装备技巧',
-    'conservation': '生态保护',
-    'reading water': '读水技巧',
-    'presentation': '呈现技巧',
-    'catch and release': '钓获放流',
-    'match hatch': '钩饵匹配',
-    'wading safety': '涉水安全',
-    'fly line': '飞钓主线',
-    'fly rod': '飞钓竿',
-    'etiquette': '垂钓礼仪',
-    'orvis': 'Orvis',
-    'winston': 'Winston',
-    'sage': 'Sage',
-    'redington': 'Redington',
-    'rio': 'Rio',
-    'scientific anglers': 'Scientific Anglers',
-    'steelhead': '钢头鳟',
-    'bass': '鲈鱼',
-    'saltwater': '海飞',
-    'tenkara': '天展',
-    'tfo': 'TFO',
-    'echo': 'Echo',
-    'lefty kreh': 'Lefty Kreh',
-    'steve rajeff': 'Steve Rajeff',
-    'all': '飞钓'
   }
 }
 
@@ -282,7 +163,7 @@ JSON格式：
       : `请按照指定的JSON格式写一篇关于${topic}的综合文章。包含具体的技术、技巧和飞钓玩家可以应用的实际建议。`
 
     const requestPayload = {
-      model: 'glm-4.7',
+      model: MODELS.GLM_4_7,
       messages: [
         {
           role: 'system',
@@ -293,9 +174,9 @@ JSON格式：
           content: userPrompt
         }
       ],
-      temperature: 0.8,
-      top_p: 0.95,
-      max_tokens: 8192,
+      temperature: AI.TEMPERATURE,
+      top_p: AI.TOP_P,
+      max_tokens: AI.MAX_TOKENS_FULL_ARTICLE,
       stream: false
     }
 
@@ -317,7 +198,7 @@ JSON格式：
           'Authorization': `Bearer ${apiKey}`
         },
         data: requestPayload,
-        timeout: 120000,
+        timeout: AI.TIMEOUT_FULL_ARTICLE,
         success: (response) => {
           try {
             if (response.statusCode === 200 && response.data.choices && response.data.choices.length > 0) {
@@ -401,7 +282,7 @@ JSON格式：
  * @returns {Promise<Object>} Article outline with title and section summaries
  */
 function generateArticleOutline(category, apiKey, language = 'en', onProgress = null, model = 'glm-4.7', apiKeys = null) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const categoryPrompts = categoryPromptsData
 
     // Use the category directly if it's not in the predefined list (custom input)
@@ -409,9 +290,9 @@ function generateArticleOutline(category, apiKey, language = 'en', onProgress = 
     const topic = categoryPrompts[language][category] || category
     const categoryLabel = categoryLabelsData[language][category] || category
 
-    console.log('[generateArticleOutline] category input:', category)
-    console.log('[generateArticleOutline] topic used:', topic)
-    console.log('[generateArticleOutline] categoryLabel:', categoryLabel)
+    logger.log('[generateArticleOutline] category input:', category)
+    logger.log('[generateArticleOutline] topic used:', topic)
+    logger.log('[generateArticleOutline] categoryLabel:', categoryLabel)
 
     const systemPrompt = language === 'en'
       ? `You are an expert fly fishing writer. Create a comprehensive article outline about ${topic}.
@@ -497,81 +378,96 @@ Output ONLY the JSON object.`
       })
     }
 
-    // Get API config based on model selection
-    const apiConfig = getApiConfig(model, apiKeys || { glmApiKey: apiKey, deepseekApiKey: '' })
+    try {
+      // Check if backend proxy is enabled
+      const useBackend = backendClient.isBackendEnabled()
+      logger.log('[generateArticleOutline] Using backend:', useBackend)
 
-    const requestPayload = {
-      model: apiConfig.model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: language === 'en' ? `Create a detailed article outline about ${topic}.` : `请创建关于${topic}的详细文章大纲。` }
-      ],
-      temperature: 0.8,
-      top_p: 0.95,
-      max_tokens: 4096,
-      stream: false
-    }
+      let content = ''
 
-    function makeApiRequest(retryCount = 0) {
-      wx.request({
-        url: apiConfig.url,
-        method: 'POST',
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiConfig.key}`
-        },
-        data: requestPayload,
-        timeout: 90000,
-        success: (response) => {
-          try {
-            if (response.statusCode === 200 && response.data.choices && response.data.choices.length > 0) {
-              let content = response.data.choices[0].message.content.trim()
-              content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      if (useBackend) {
+        // Use backend proxy
+        const response = await backendClient.generateArticleOutline({
+          model: model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: language === 'en' ? `Create a detailed article outline about ${topic}.` : `请创建关于${topic}的详细文章大纲。` }
+          ],
+          temperature: AI.TEMPERATURE,
+          top_p: AI.TOP_P,
+          max_tokens: AI.MAX_TOKENS_OUTLINE
+        })
 
-              const outlineData = JSON.parse(content)
-
-              if (!outlineData.title || !outlineData.sections || !Array.isArray(outlineData.sections) || outlineData.sections.length !== 5) {
-                throw new Error('Invalid outline structure')
-              }
-
-              if (onProgress) {
-                onProgress({
-                  stage: 'outline_complete',
-                  message: language === 'en' ? 'Outline ready!' : '大纲已就绪！',
-                  detail: language === 'en' ? `Title: "${outlineData.title.substring(0, 30)}..."` : `标题："${outlineData.title.substring(0, 30)}..."`
-                })
-              }
-
-              resolve({
-                title: outlineData.title,
-                sections: outlineData.sections,
-                references: outlineData.references || [],
-                category: categoryLabel,
-                originalCategory: category
-              })
-            } else {
-              reject(new Error('Invalid API response'))
-            }
-          } catch (error) {
-            if (retryCount < 1) {
-              console.log(`Outline parse failed, retrying...`)
-              setTimeout(() => makeApiRequest(retryCount + 1), 1000)
-            } else {
-              reject(new Error(`Failed to parse outline: ${error.message}`))
-            }
-          }
-        },
-        fail: (error) => {
-          if (retryCount < 1) {
-            setTimeout(() => makeApiRequest(retryCount + 1), 1000)
-          } else {
-            reject(new Error(`Outline API request failed: ${error.errMsg || 'Network error'}`))
-          }
+        if (response.choices && response.choices.length > 0) {
+          content = response.choices[0].message.content.trim()
+        } else {
+          throw new Error('Invalid backend response')
         }
-      })
-    }
+      } else {
+        // Use direct API call
+        const apiConfig = getApiConfig(model, apiKeys || { glmApiKey: apiKey, deepseekApiKey: '' })
 
-    makeApiRequest()
+        const requestPayload = {
+          model: apiConfig.model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: language === 'en' ? `Create a detailed article outline about ${topic}.` : `请创建关于${topic}的详细文章大纲。` }
+          ],
+          temperature: AI.TEMPERATURE,
+          top_p: AI.TOP_P,
+          max_tokens: AI.MAX_TOKENS_OUTLINE,
+          stream: false
+        }
+
+        const response = await new Promise((resolve, reject) => {
+          wx.request({
+            url: apiConfig.url,
+            method: 'POST',
+            header: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiConfig.key}`
+            },
+            data: requestPayload,
+            timeout: AI.TIMEOUT_OUTLINE,
+            success: resolve,
+            fail: reject
+          })
+        })
+
+        if (response.statusCode === 200 && response.data.choices && response.data.choices.length > 0) {
+          content = response.data.choices[0].message.content.trim()
+        } else {
+          throw new Error('Invalid API response')
+        }
+      }
+
+      // Parse and validate content
+      content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      const outlineData = JSON.parse(content)
+
+      if (!outlineData.title || !outlineData.sections || !Array.isArray(outlineData.sections) || outlineData.sections.length !== 5) {
+        throw new Error('Invalid outline structure')
+      }
+
+      if (onProgress) {
+        onProgress({
+          stage: 'outline_complete',
+          message: language === 'en' ? 'Outline ready!' : '大纲已就绪！',
+          detail: language === 'en' ? `Title: "${outlineData.title.substring(0, 30)}..."` : `标题："${outlineData.title.substring(0, 30)}..."`
+        })
+      }
+
+      resolve({
+        title: outlineData.title,
+        sections: outlineData.sections,
+        references: outlineData.references || [],
+        category: categoryLabel,
+        originalCategory: category
+      })
+    } catch (error) {
+      logger.error('[generateArticleOutline] Error:', error)
+      reject(error)
+    }
   })
 }
 
@@ -585,9 +481,9 @@ Output ONLY the JSON object.`
  * @returns {Promise<Object>} Expanded section with intro and subParagraphs
  */
 function expandSection(section, apiKey, language = 'en', model = 'glm-4.7', apiKeys = null) {
-  console.log('[expandSection] START - Section:', section.title)
-  console.log('[expandSection] Language:', language)
-  console.log('[expandSection] Model:', model)
+  logger.log('[expandSection] START - Section:', section.title)
+  logger.log('[expandSection] Language:', language)
+  logger.log('[expandSection] Model:', model)
 
   return new Promise((resolve, reject) => {
     const systemPrompt = language === 'en'
@@ -649,9 +545,9 @@ Output ONLY valid JSON in this format:
         { role: 'system', content: systemPrompt },
         { role: 'user', content: language === 'en' ? 'Expand this section into full content.' : '将此章节扩展为完整内容。' }
       ],
-      temperature: 0.8,
-      top_p: 0.95,
-      max_tokens: 4096,
+      temperature: AI.TEMPERATURE,
+      top_p: AI.TOP_P,
+      max_tokens: AI.MAX_TOKENS_EXPANSION,
       stream: false
     }
 
@@ -663,73 +559,59 @@ Output ONLY valid JSON in this format:
         'Authorization': `Bearer ${apiConfig.key}`
       },
       data: requestPayload,
-      timeout: 60000,
+      timeout: AI.TIMEOUT_EXPANSION,
       success: (response) => {
-        console.log('[expandSection] Response status:', response.statusCode)
-        console.log('[expandSection] Response data:', JSON.stringify(response.data))
+        logger.log('[expandSection] Response status:', response.statusCode)
 
         try {
           if (response.statusCode === 200 && response.data.choices && response.data.choices.length > 0) {
             let content = response.data.choices[0].message.content.trim()
-            console.log('[expandSection] Raw content length:', content.length)
-            console.log('[expandSection] Raw content:', content.substring(0, 200))
+            logger.log('[expandSection] Raw content length:', content.length)
 
             content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '')
-            console.log('[expandSection] Cleaned content:', content.substring(0, 200))
 
             const sectionData = JSON.parse(content)
-            console.log('[expandSection] Parsed sectionData:', JSON.stringify(sectionData))
-            console.log('[expandSection] subParagraphs count:', sectionData.subParagraphs?.length || 0)
+            logger.log('[expandSection] Parsed sectionData, subParagraphs count:', sectionData.subParagraphs?.length || 0)
 
             const result = {
               intro: sectionData.intro || section.summary,
               subParagraphs: sectionData.subParagraphs || [],
               imagePrompt: section.imagePrompt
             }
-            console.log('[expandSection] RESOLVING with subParagraphs count:', result.subParagraphs.length)
-            console.log('[expandSection] Final result structure:', {
-              hasIntro: !!result.intro,
-              subParagraphsCount: result.subParagraphs.length,
-              hasImagePrompt: !!result.imagePrompt
-            })
+            logger.log('[expandSection] RESOLVING with subParagraphs count:', result.subParagraphs.length)
             resolve(result)
           } else {
-            console.error('[expandSection] API returned non-200 or no choices')
-            console.error('[expandSection] Status code:', response.statusCode)
-            console.error('[expandSection] Has choices:', !!(response.data.choices && response.data.choices.length > 0))
+            logger.error('[expandSection] API returned non-200 or no choices, Status code:', response.statusCode)
             // Fallback to original summary if API fails
             const fallback = {
               intro: section.summary,
               subParagraphs: [],
               imagePrompt: section.imagePrompt
             }
-            console.log('[expandSection] FALLBACK - using empty subParagraphs')
+            logger.warn('[expandSection] FALLBACK - using empty subParagraphs')
             resolve(fallback)
           }
         } catch (error) {
-          console.error('[expandSection] Parse error:', error)
-          console.error('[expandSection] Error message:', error.message)
-          console.error('[expandSection] Error stack:', error.stack)
+          logger.error('[expandSection] Parse error:', error.message)
           // Fallback to original summary on parse error
           const fallback = {
             intro: section.summary,
             subParagraphs: [],
             imagePrompt: section.imagePrompt
           }
-          console.log('[expandSection] FALLBACK (parse error) - using empty subParagraphs')
+          logger.warn('[expandSection] FALLBACK (parse error) - using empty subParagraphs')
           resolve(fallback)
         }
       },
       fail: (error) => {
-        console.error('[expandSection] Network error:', error)
-        console.error('[expandSection] Error details:', JSON.stringify(error))
+        logger.error('[expandSection] Network error:', error.errMsg || 'Unknown error')
         // Fallback to original summary on network error
         const fallback = {
           intro: section.summary,
           subParagraphs: [],
           imagePrompt: section.imagePrompt
         }
-        console.log('[expandSection] FALLBACK (network error) - using empty subParagraphs')
+        logger.warn('[expandSection] FALLBACK (network error) - using empty subParagraphs')
         resolve(fallback)
       }
     })
@@ -739,96 +621,133 @@ Output ONLY valid JSON in this format:
 /**
  * Generate an image using BigModel's CogView-3-Flash API
  * @param {string} prompt - Image generation prompt
- * @param {string} apiKey - BigModel API key
+ * @param {string} apiKey - BigModel API key (deprecated, backend used when available)
  * @returns {Promise<string>} Image URL
  */
 function generateImage(prompt, apiKey) {
-  return new Promise((resolve, reject) => {
-    const requestPayload = {
-      model: 'cogview-3-flash',
-      prompt: prompt,
-      size: '1024x1024'
-    }
+  return new Promise(async (resolve, reject) => {
+    try {
+      let imageUrl = ''
 
-    wx.request({
-      url: IMAGE_API_URL,
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      data: requestPayload,
-      timeout: 60000,
-      success: (response) => {
-        try {
-          if (response.statusCode === 200 && response.data && response.data.data && response.data.data.length > 0) {
-            const imageUrl = response.data.data[0].url
-            resolve(imageUrl)
-          } else {
-            reject(new Error('Invalid image API response'))
-          }
-        } catch (error) {
-          reject(new Error(`Failed to parse image API response: ${error.message}`))
+      // Check if backend proxy is enabled
+      const useBackend = backendClient.isBackendEnabled()
+      logger.log('[generateImage] Using backend:', useBackend)
+
+      if (useBackend) {
+        // Use backend proxy
+        imageUrl = await backendClient.generateImage(prompt, AI.IMAGE_SIZE)
+        resolve(imageUrl)
+      } else {
+        // Use direct API call
+        const requestPayload = {
+          model: 'cogview-3-flash',
+          prompt: prompt,
+          size: AI.IMAGE_SIZE
         }
-      },
-      fail: (error) => {
-        reject(new Error(`Image API request failed: ${error.errMsg || 'Network error'}`))
+
+        wx.request({
+          url: IMAGE_API_URL,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          data: requestPayload,
+          timeout: AI.TIMEOUT_IMAGE,
+          success: (response) => {
+            try {
+              if (response.statusCode === 200 && response.data && response.data.data && response.data.data.length > 0) {
+                const imageUrl = response.data.data[0].url
+                resolve(imageUrl)
+              } else {
+                reject(new Error('Invalid image API response'))
+              }
+            } catch (error) {
+              reject(new Error(`Failed to parse image API response: ${error.message}`))
+            }
+          },
+          fail: (error) => {
+            reject(new Error(`Image API request failed: ${error.errMsg || 'Network error'}`))
+          }
+        })
       }
-    })
+    } catch (error) {
+      logger.error('[generateImage] Error:', error)
+      reject(error)
+    }
   })
 }
 
 /**
- * Generate multiple images for article paragraphs
+ * Generate multiple images for article paragraphs in parallel
  * @param {Array} paragraphs - Array of paragraph objects with imagePrompt
  * @param {string} apiKey - BigModel API key
  * @param {Function} onProgress - Callback for progress updates {stage, current, total, message}
  * @returns {Promise<Array>} Array of image objects with url and description
  */
 async function generateImagesForParagraphs(paragraphs, apiKey, onProgress = null) {
-  const images = []
+  // Report starting parallel image generation
+  if (onProgress) {
+    onProgress({
+      stage: 'parallel_images_start',
+      total: paragraphs.length,
+      message: `Starting parallel image generation for ${paragraphs.length} sections...`,
+      detail: 'Generating all images simultaneously'
+    })
+  }
 
-  for (let i = 0; i < paragraphs.length; i++) {
+  // Generate all images in parallel
+  const imagePromises = paragraphs.map(async (paragraph, index) => {
     try {
-      // Report progress for each image
-      if (onProgress) {
-        onProgress({
-          stage: 'paragraph_image',
-          current: i + 1,
-          total: paragraphs.length,
-          message: `Loading image ${i + 1}/${paragraphs.length}...`,
-          detail: `Section ${i + 1} image`
-        })
-      }
-
-      const prompt = paragraphs[i].imagePrompt
+      const prompt = paragraph.imagePrompt
       const imageUrl = await generateImage(prompt, apiKey)
-      images.push({
-        url: imageUrl,
-        description: prompt
-      })
 
-      // Report completion of this image
+      // Report individual image completion
       if (onProgress) {
         onProgress({
           stage: 'paragraph_image_complete',
-          current: i + 1,
+          current: index + 1,
           total: paragraphs.length,
-          message: `Image ${i + 1}/${paragraphs.length} complete!`,
-          detail: `Section ${i + 1} image ready`
+          message: `Image ${index + 1}/${paragraphs.length} complete!`,
+          detail: `Section ${index + 1} image ready`
         })
       }
+
+      return {
+        url: imageUrl,
+        description: prompt,
+        index: index
+      }
     } catch (error) {
-      console.error(`Failed to generate image for paragraph ${i + 1}:`, error)
-      // Add placeholder for failed image
-      images.push({
+      logger.error(`Failed to generate image for paragraph ${index + 1}:`, error)
+      // Return placeholder for failed image
+      return {
         url: '',
-        description: paragraphs[i].imagePrompt
-      })
+        description: paragraph.imagePrompt,
+        index: index
+      }
     }
+  })
+
+  // Wait for all images to complete
+  const images = await Promise.all(imagePromises)
+
+  // Sort by original index and remove index property
+  const sortedImages = images
+    .sort((a, b) => a.index - b.index)
+    .map(({ url, description }) => ({ url, description }))
+
+  // Report all images complete
+  if (onProgress) {
+    onProgress({
+      stage: 'parallel_images_complete',
+      total: paragraphs.length,
+      message: 'All images generated!',
+      detail: `${sortedImages.filter(img => img.url).length}/${paragraphs.length} images successful`
+    })
   }
 
-  return images
+  return sortedImages
 }
 
 /**

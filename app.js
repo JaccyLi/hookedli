@@ -1,10 +1,19 @@
 App({
   globalData: {
-    bigModelApiKey: 'bae66e9df8274f079451d708744af0b2.8sEcD3QeAPPvERLh',
-    deepseekApiKey: 'sk-f746ad4d77de44269b1bb500460c083d', // User needs to add their DeepSeek API key
+    // SECURITY: API keys should be managed by a backend proxy server
+    // TODO: Implement backend API endpoint that handles AI model requests
+    // Current implementation uses client-side storage (not secure for production)
+    bigModelApiKey: '', // Set via wx.setStorageSync('bigModelApiKey')
+    deepseekApiKey: '', // Set via wx.setStorageSync('deepseekApiKey')
     selectedModel: 'deepseek-chat', // Options: 'glm-4.7', 'deepseek-chat', or 'deepseek-reasoner'
     language: 'zh',
-    debugMode: false // Set to true for development, false for production
+    debugMode: false, // Set to true for development, false for production
+
+    // API configuration for backend migration
+    apiConfig: {
+      useBackendProxy: false, // TODO: Set to true when backend is ready
+      backendUrl: '' // TODO: Configure backend URL when ready
+    }
   },
 
   onLaunch() {
@@ -14,6 +23,7 @@ App({
       this.globalData.selectedModel = savedModel
     }
 
+    // Load API keys from storage (priority: storage > globalData default)
     const savedDeepseekKey = wx.getStorageSync('deepseekApiKey')
     if (savedDeepseekKey) {
       this.globalData.deepseekApiKey = savedDeepseekKey

@@ -6,6 +6,9 @@ const distanceCastingFlashcardsModule = require('./flashcards/distance_casting_f
 const slacklinePresentationFlashcardsModule = require('./flashcards/slackline_presentation_flashcards.js')
 const articlesList = require('../articles/articles-list.js')
 const logger = require('../../utils/logger.js')
+const validator = require('../../utils/validator.js')
+const errorHandler = require('../../utils/error-handler.js')
+const { globalDebouncer, globalRateLimiter } = require('../../utils/rate-limiter.js')
 
 const generateArticleOutline = bigModelModule.generateArticleOutline
 const expandSection = bigModelModule.expandSection
@@ -252,7 +255,7 @@ Page({
 
   selectCategory(e) {
     const category = e.currentTarget.dataset.category
-    console.log('[selectCategory] Selected predefined category:', category)
+    logger.log('[selectCategory] Selected predefined category:', category)
 
     // Clear custom input when selecting a predefined category
     this.setData({
@@ -260,7 +263,7 @@ Page({
       customCategory: ''  // Clear custom input
     })
 
-    console.log('[selectCategory] customCategory cleared')
+    logger.log('[selectCategory] customCategory cleared')
   },
 
   cancelGeneration() {
@@ -500,24 +503,36 @@ Page({
 
   onCategoryInput(e) {
     const value = e.detail.value
-    console.log('=== onCategoryInput ===')
-    console.log('[1] Input received:', value)
-    console.log('[2] Current customCategory:', this.data.customCategory)
+    logger.log('[onCategoryInput] Input received:', value)
 
-    // Don't update selectedCategory when user types custom input
-    // Only update customCategory
+    // Validate input
+    const validation = validator.validateCategoryInput(value)
+
+    if (!validation.valid) {
+      logger.warn('[onCategoryInput] Invalid input:', validation.error)
+
+      // Show warning but don't block typing (just sanitize)
+      if (value.length > 100) {
+        wx.showToast({
+          title: this.data.language === 'en'
+            ? 'Input too long (max 100 chars)'
+            : '输入过长（最多100个字符）',
+          icon: 'none',
+          duration: 2000
+        })
+        return
+      }
+    }
+
+    // Use sanitized input
+    const sanitizedValue = validation.valid ? validation.sanitized : value
     this.setData({
-      customCategory: value
-    }, () => {
-      console.log('[3] After setData customCategory:', this.data.customCategory)
+      customCategory: sanitizedValue
     })
-
-    console.log('[4] selectedCategory remains:', this.data.selectedCategory)
-    console.log('=====================')
   },
 
   clearCustomCategory() {
-    console.log('[clearCustomCategory] Clearing custom input')
+    logger.log('[clearCustomCategory] Clearing custom input')
     this.setData({
       customCategory: ''
     })
@@ -528,7 +543,7 @@ Page({
     const currentArticleIndex = this.data.currentArticleIndex
 
     if (currentArticleIndex <= 0) {
-      console.log('[Navigation] No previous articles')
+      logger.log('[Navigation] No previous articles')
       return
     }
 
@@ -548,7 +563,7 @@ Page({
     const currentArticleIndex = this.data.currentArticleIndex
 
     if (currentArticleIndex >= navigationHistory.length - 1) {
-      console.log('[Navigation] No next articles')
+      logger.log('[Navigation] No next articles')
       return
     }
     
@@ -570,15 +585,41 @@ Page({
   },
 
   async generateCard() {
-    console.log('=== generateCard called ===')
+    logger.log('[generateCard] Called')
 
     if (this.data.loading) {
+      logger.warn('[generateCard] Already loading, ignoring request')
       return
     }
 
-    console.log('selectedCategory:', this.data.selectedCategory)
+    // Check rate limit
+    if (!globalRateLimiter.canMakeRequest()) {
+      const waitTime = Math.ceil(globalRateLimiter.getTimeUntilNextRequest() / 1000)
+      wx.showToast({
+        title: this.data.language === 'en'
+          ? `Please wait ${waitTime}s before trying again`
+          : `请等待${waitTime}秒后重试`,
+        icon: 'none',
+        duration: 2500
+      })
+      return
+    }
+
     const app = getApp()
     const apiKey = app.globalData.bigModelApiKey
+
+    // Validate API key
+    if (!validator.validateApiKey(apiKey)) {
+      logger.error('[generateCard] Invalid API key')
+      wx.showToast({
+        title: this.data.language === 'en'
+          ? 'Please configure API key in settings'
+          : '请在设置中配置API密钥',
+        icon: 'none',
+        duration: 3000
+      })
+      return
+    }
 
     if (this.data.shouldCancel) {
       this.setData({
@@ -605,14 +646,29 @@ Page({
       loadingDetail: ''
     })
 
-    console.log('=== Category Selection ===')
-    console.log('selectedCategory:', this.data.selectedCategory)
-    console.log('customCategory:', this.data.customCategory)
+    logger.log('[generateCard] Category Selection:', {
+      selectedCategory: this.data.selectedCategory,
+      customCategory: this.data.customCategory
+    })
 
     const categoryToUse = this.data.customCategory ? this.data.customCategory : this.data.selectedCategory
 
-    console.log('categoryToUse (FINAL):', categoryToUse)
-    console.log('======================')
+    // Validate category input
+    const validation = validator.validateCategoryInput(categoryToUse)
+    if (!validation.valid) {
+      logger.error('[generateCard] Invalid category:', validation.error)
+      self.setData({
+        error: validation.error,
+        loading: false
+      })
+
+      wx.showToast({
+        title: self.data.language === 'en' ? validation.error : '输入无效',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
 
     try {
       const selectedModel = app.globalData.selectedModel || 'deepseek-chat'
@@ -621,7 +677,7 @@ Page({
         deepseekApiKey: app.globalData.deepseekApiKey
       }
 
-      console.log('[Model] Using:', selectedModel)
+      logger.log('[Model] Using:', selectedModel)
 
       this.setData({
         loadingStep: isEn ? 'Finding results...' : '查找结果中...',
@@ -636,7 +692,7 @@ Page({
         (progress) => {
           if (self.data.shouldCancel) return
 
-          console.log('[Progress]', progress)
+          logger.log('[Progress]', progress)
 
           self.setData({
             loadingStep: progress.message,
@@ -659,14 +715,14 @@ Page({
 
       // Step 1: Expand all section content in parallel
       const expansionPromises = outline.sections.map(async (section, index) => {
-        console.log(`[generateCard] Expanding section ${index + 1}:`, section.title)
+        logger.log(`[generateCard] Expanding section ${index + 1}:`, section.title)
         const expandedSection = await expandSection(section, apiKey, self.data.language, selectedModel, apiKeys)
-        console.log(`[generateCard] Section ${index + 1} expanded, subParagraphs count:`, expandedSection.subParagraphs?.length || 0)
+        logger.log(`[generateCard] Section ${index + 1} expanded, subParagraphs count:`, expandedSection.subParagraphs?.length || 0)
         return { index, expandedSection }
       })
 
       const expandedSections = await Promise.all(expansionPromises)
-      console.log('[generateCard] All sections expanded')
+      logger.log('[generateCard] All sections expanded')
 
       // Step 2: Generate all images in parallel
       this.setData({
@@ -679,15 +735,15 @@ Page({
         let imageUrl = ''
         try {
           imageUrl = await generateImage(outline.sections[index].imagePrompt, apiKey)
-          console.log(`[Section ${index + 1}] Image generated`)
+          logger.log(`[Section ${index + 1}] Image generated`)
         } catch (error) {
-          console.error(`[Section ${index + 1}] Image generation failed:`, error)
+          logger.error(`[Section ${index + 1}] Image generation failed:`, error)
         }
 
         const finalSection = Object.assign({}, expandedSection, {
           imageUrl: imageUrl
         })
-        console.log(`[generateCard] Section ${index + 1} final subParagraphs count:`, finalSection.subParagraphs?.length || 0)
+        logger.log(`[generateCard] Section ${index + 1} final subParagraphs count:`, finalSection.subParagraphs?.length || 0)
         return finalSection
       })
 
@@ -698,10 +754,10 @@ Page({
         heroImagePromise
       ])
 
-      console.log('[generateCard] All sections processed')
-      console.log('[generateCard] Total paragraphs count:', paragraphs.length)
+      logger.log('[generateCard] All sections processed')
+      logger.log('[generateCard] Total paragraphs count:', paragraphs.length)
       paragraphs.forEach((para, index) => {
-        console.log(`[generateCard] Final paragraph ${index + 1} subParagraphs count:`, para.subParagraphs?.length || 0)
+        logger.log(`[generateCard] Final paragraph ${index + 1} subParagraphs count:`, para.subParagraphs?.length || 0)
       })
 
       if (self.data.shouldCancel) {
@@ -723,10 +779,10 @@ Page({
         timestamp: new Date().toISOString()
       }
 
-      console.log('[generateCard] cardData created')
-      console.log('[generateCard] cardData.paragraphs count:', cardData.paragraphs.length)
+      logger.log('[generateCard] cardData created')
+      logger.log('[generateCard] cardData.paragraphs count:', cardData.paragraphs.length)
       cardData.paragraphs.forEach((para, index) => {
-        console.log(`[generateCard] cardData paragraph ${index + 1}:`, {
+        logger.log(`[generateCard] cardData paragraph ${index + 1}:`, {
           introLength: para.intro?.length || 0,
           subParagraphsCount: para.subParagraphs?.length || 0,
           hasImageUrl: !!para.imageUrl
@@ -749,15 +805,12 @@ Page({
       if (self.data.shouldCancel) {
         return
       }
-      console.error('Generate card error:', err)
-      self.setData({
-        error: this.data.language === 'en' ? 'Search failed. Please try again.' : '搜索失败，请重试。'
-      })
 
-      wx.showToast({
-        title: this.data.language === 'en' ? 'Search failed' : '搜索失败',
-        icon: 'error',
-        duration: 2000
+      // Handle error with proper categorization and user messaging
+      errorHandler.handleError(err, 'generateCard', self.data.language, wx.showToast)
+
+      self.setData({
+        error: errorHandler.getErrorMessage(err, self.data.language)
       })
     } finally {
       self.setData({

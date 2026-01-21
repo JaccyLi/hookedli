@@ -433,3 +433,169 @@ button,
 .model-card {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Backend Status Styles */
+.status-group {
+  margin-bottom: 32rpx;
+}
+
+.status-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 16rpx;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 20rpx;
+  background: #ffffff;
+  border: 4rpx solid #000000;
+  border-radius: 16rpx;
+  box-shadow: 4rpx 4rpx 0 rgba(0, 0, 0, 0.1);
+}
+
+.status-indicator.connected {
+  background: #d1fae5;
+  border-color: #34c759;
+}
+
+.status-indicator.disconnected {
+  background: #fee2e2;
+  border-color: #ff3b30;
+}
+
+.status-dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: #000000;
+  flex-shrink: 0;
+}
+
+.status-indicator.connected .status-dot {
+  background: #34c759;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-indicator.disconnected .status-dot {
+  background: #ff3b30;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.status-text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #000000;
+}
+
+.status-indicator.connected .status-text {
+  color: #34c759;
+}
+
+.status-indicator.disconnected .status-text {
+  color: #ff3b30;
+}
+
+/* Input Styles */
+.input-group {
+  margin-bottom: 32rpx;
+}
+
+.input-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 16rpx;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.api-input {
+  width: 100%;
+  min-height: 88rpx;
+  background: #ffffff;
+  border: 4rpx solid #000000;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: #000000;
+  box-sizing: border-box;
+  box-shadow: 4rpx 4rpx 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.api-input:focus {
+  border-color: #000000;
+  box-shadow: 6rpx 6rpx 0 rgba(0, 0, 0, 0.2);
+}
+
+.save-btn {
+  width: 100%;
+  min-height: 100rpx;
+  background: #000000;
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 900;
+  border: none;
+  border-radius: 16rpx;
+  margin-top: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 6rpx 6rpx 0 #000000;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 1rpx;
+}
+
+.save-btn::after {
+  border: none;
+}
+
+.save-btn:active {
+  transform: translate(3rpx, 3rpx);
+  box-shadow: 3rpx 3rpx 0 #000000;
+}
+
+.help-tip {
+  display: flex;
+  gap: 16rpx;
+  align-items: flex-start;
+  background: #f0f9ff;
+  border: 3rpx solid #000000;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-top: 24rpx;
+  box-shadow: 3rpx 3rpx 0 rgba(0, 0, 0, 0.1);
+}
+
+.help-icon {
+  font-size: 36rpx;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.help-text {
+  flex: 1;
+  font-size: 24rpx;
+  color: #333333;
+  line-height: 1.6;
+  font-weight: 500;
+}
