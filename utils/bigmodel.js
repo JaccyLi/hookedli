@@ -315,6 +315,8 @@ function generateArticleOutline(category, apiKey, language = 'en', onProgress = 
     const systemPrompt = language === 'en'
       ? `You are an expert fly fishing writer. Create a comprehensive article outline about ${topic}.
 
+IMPORTANT: All content MUST be in English. Write the title, section titles, sentences, and everything else in English only.
+
 Required Structure:
 {
   "title": "Article title (50-100 characters)",
@@ -343,9 +345,12 @@ REQUIREMENTS:
 - Sentences should outline key points to be expanded into paragraphs later
 - Image prompts should describe professional fly fishing photography
 - Include 3-5 real reference URLs
+- ALL TEXT must be in English
 
 Output ONLY the JSON object.`
       : `你是一位资深的飞钓专家。请创作关于${topic}的文章大纲。
+
+重要：所有内容必须使用中文。标题、章节标题、句子等所有内容都必须用中文撰写。
 
 要求的结构：
 {
@@ -375,6 +380,7 @@ Output ONLY the JSON object.`
 - 句子应该概述稍后要扩展成段落的关键点
 - 图片提示应该描述专业的飞钓摄影
 - 包括3-5个真实的参考URL
+- 所有文字必须使用中文
 
 只输出JSON对象。`
 
@@ -514,6 +520,8 @@ async function expandSection(section, apiKey, language = 'en', model = 'glm-4.7'
   const systemPrompt = language === 'en'
     ? `You are an expert fly fishing writer. Expand the following section sentences into a complete article section.
 
+IMPORTANT: All content MUST be in English. Write the introduction and all paragraphs in English only.
+
 Section Title: ${section.title}
 
 Section Sentences to Expand:
@@ -530,19 +538,22 @@ CRITICAL REQUIREMENTS:
 - Content must be practical, actionable, and highly informative
 - Include specific techniques, tips, or examples
 - Use clear, professional language
+- ALL TEXT must be in English
 
 Output ONLY plain text in this exact format (do not use JSON code blocks):
 
-INTRO: [Your brief introduction here]
+INTRO: [Your brief introduction here in English]
 
-PARAGRAPH 1: [Your first expanded paragraph - must be 100+ words]
+PARAGRAPH 1: [Your first expanded paragraph in English - must be 100+ words]
 
-PARAGRAPH 2: [Your second expanded paragraph - must be 100+ words]
+PARAGRAPH 2: [Your second expanded paragraph in English - must be 100+ words]
 
-PARAGRAPH 3: [Your third expanded paragraph - must be 100+ words]
+PARAGRAPH 3: [Your third expanded paragraph in English - must be 100+ words]
 
-Remember: ALL 3 paragraphs must be expanded with substantial content. Do not truncate or skip any paragraph.`
+Remember: ALL 3 paragraphs must be expanded with substantial content in English. Do not truncate or skip any paragraph.`
     : `你是一位资深的飞钓专家。将以下章节句子扩展为完整的文章章节。
+
+重要：所有内容必须使用中文。介绍和所有段落都必须用中文撰写。
 
 章节标题：${section.title}
 
@@ -560,18 +571,19 @@ ${sentencesText}
 - 内容必须实用、可操作且信息丰富
 - 包含具体技巧、提示或示例
 - 使用清晰、专业的语言
+- 所有文字必须使用中文
 
 只输出纯文本格式，不要使用JSON代码块：
 
-介绍：[你的简短介绍]
+介绍：[你的简短介绍，使用中文]
 
-段落1：[你的第一个扩展段落 - 必须100字以上]
+段落1：[你的第一个扩展段落，使用中文 - 必须100字以上]
 
-段落2：[你的第二个扩展段落 - 必须100字以上]
+段落2：[你的第二个扩展段落，使用中文 - 必须100字以上]
 
-段落3：[你的第三个扩展段落 - 必须100字以上]
+段落3：[你的第三个扩展段落，使用中文 - 必须100字以上]
 
-记住：所有3个段落都必须扩展为充实的内容。不要截断或跳过任何段落。`
+记住：所有3个段落都必须用中文扩展为充实的内容。不要截断或跳过任何段落。`
 
   try {
     // Check if backend proxy is enabled
