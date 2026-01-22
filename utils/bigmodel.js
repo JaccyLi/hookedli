@@ -660,11 +660,12 @@ ${sentencesText}
       const introMatch = text.match(introPattern)
       const intro = introMatch ? introMatch[1].trim() : section.title
 
-      // Extract paragraphs
+      // Extract paragraphs using match with global flag
       const paragraphs = []
-      const paragraphMatches = text.matchAll(paragraphPattern)
+      const paragraphPatternWithGlobal = new RegExp(paragraphPattern.source, paragraphPattern.flags + 'g')
+      let match
 
-      for (const match of paragraphMatches) {
+      while ((match = paragraphPatternWithGlobal.exec(text)) !== null) {
         const num = parseInt(match[1])
         const content = match[2].trim()
         paragraphs[num - 1] = `${num}. ${content}` // Add number prefix
