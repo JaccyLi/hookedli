@@ -42,8 +42,8 @@ Page({
     wx.setStorageSync('selectedModel', internalModel)
 
     const modelNames = {
-      'default': { en: 'Default Search', zh: '默认搜索' },
-      'high-quality': { en: 'High Quality Search', zh: '高质量搜索' }
+      'default': { en: 'Standard Search', zh: '标准搜索' },
+      'high-quality': { en: 'Premium Search', zh: '高级搜索' }
     }
 
     wx.showToast({

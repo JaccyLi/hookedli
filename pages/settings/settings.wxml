@@ -2,8 +2,8 @@
 <view class="container">
   <!-- Header Section -->
   <view class="header">
-    <text class="title">{{language === 'en' ? 'Settings' : '设置'}}</text>
-    <text class="subtitle">{{language === 'en' ? 'Select your search engine' : '选择您的搜索引擎'}}</text>
+    <text class="title">{{language === 'en' ? 'Search Settings' : '搜索设置'}}</text>
+    <text class="subtitle">{{language === 'en' ? 'Choose your preferred search experience' : '选择您偏好的搜索体验'}}</text>
   </view>
 
   <!-- Unified Section: Notice + Search Engine Selection -->
@@ -13,19 +13,19 @@
       <text class="tip-icon">💡</text>
       <view class="tip-content">
         <text class="tip-title">{{language === 'en' ? 'Recommendation' : '推荐'}}</text>
-        <text class="tip-text">{{language === 'en' ? 'Default Search offers the best balance of speed and quality for daily use.' : '默认搜索在速度和质量之间取得了最佳平衡，适合日常使用。'}}</text>
+        <text class="tip-text">{{language === 'en' ? 'Standard Search delivers fast, accurate results from our knowledge base.' : '标准搜索从我们的知识库中快速、准确地返回结果。'}}</text>
       </view>
     </view>
 
     <!-- Section Header -->
     <view class="section-header">
-      <text class="section-title">{{language === 'en' ? 'Search Engine Selection' : '搜索引擎选择'}}</text>
-      <text class="section-desc">{{language === 'en' ? 'Choose which search engine to use for finding articles' : '选择用于查找文章的搜索引擎'}}</text>
+      <text class="section-title">{{language === 'en' ? 'Search Mode' : '搜索模式'}}</text>
+      <text class="section-desc">{{language === 'en' ? 'Select how you want to search through articles' : '选择您想要的文章搜索方式'}}</text>
     </view>
 
     <!-- Search Engine Options -->
     <radio-group class="model-options" bindchange="onModelChange">
-      <!-- Default Search (All DeepSeek-Chat) -->
+      <!-- Standard Search -->
       <label class="model-card {{selectedModel === 'default' ? 'active' : ''}}">
         <radio value="default" checked="{{selectedModel === 'default'}}" class="hidden-radio" />
         <view class="model-card-content">
@@ -33,12 +33,12 @@
             <text class="model-icon">⚡</text>
           </view>
           <view class="model-details">
-            <text class="model-name">{{language === 'en' ? 'Default Search' : '默认搜索'}}</text>
+            <text class="model-name">{{language === 'en' ? 'Standard Search' : '标准搜索'}}</text>
             <text class="model-tags">
-              <text class="tag tag-quality tag-recommended">{{language === 'en' ? 'Great Quality' : '质量好'}}</text>
-              <text class="tag tag-speed tag-recommended">{{language === 'en' ? 'Fastest' : '最快'}}</text>
+              <text class="tag tag-quality tag-recommended">{{language === 'en' ? 'Recommended' : '推荐'}}</text>
+              <text class="tag tag-speed tag-recommended">{{language === 'en' ? 'Fast' : '快速'}}</text>
             </text>
-            <text class="model-desc">{{language === 'en' ? '✅ All DeepSeek-Chat • Parallel processing • Best for daily use' : '✅ 全部使用DeepSeek-Chat • 并行处理 • 适合日常使用'}}</text>
+            <text class="model-desc">{{language === 'en' ? '✅ Quick results from extensive database • Parallel indexing • Best for daily use' : '✅ 从海量数据库快速检索 • 并行索引 • 适合日常使用'}}</text>
           </view>
           <view class="model-indicator {{selectedModel === 'default' ? 'active' : ''}}">
             <view class="indicator-dot"></view>
@@ -46,7 +46,7 @@
         </view>
       </label>
 
-      <!-- High Quality Search (Reasoner for outline, Chat for sections) -->
+      <!-- Premium Search -->
       <label class="model-card {{selectedModel === 'high-quality' ? 'active' : ''}}">
         <radio value="high-quality" checked="{{selectedModel === 'high-quality'}}" class="hidden-radio" />
         <view class="model-card-content">
@@ -54,12 +54,12 @@
             <text class="model-icon">🔬</text>
           </view>
           <view class="model-details">
-            <text class="model-name">{{language === 'en' ? 'High Quality Search' : '高质量搜索'}}</text>
+            <text class="model-name">{{language === 'en' ? 'Premium Search' : '高级搜索'}}</text>
             <text class="model-tags">
-              <text class="tag tag-quality tag-best">{{language === 'en' ? 'Best Framework' : '最佳框架'}}</text>
-              <text class="tag tag-speed tag-slower">{{language === 'en' ? 'Slower' : '较慢'}}</text>
+              <text class="tag tag-quality tag-best">{{language === 'en' ? 'In-Depth' : '深度'}}</text>
+              <text class="tag tag-speed tag-slower">{{language === 'en' ? 'Takes Longer' : '耗时较长'}}</text>
             </text>
-            <text class="model-desc">{{language === 'en' ? '✅ DeepSeek-Reasoner outline • DeepSeek-Chat sections • Smart hybrid mode' : '✅ DeepSeek-Reasoner大纲 • DeepSeek-Chat章节 • 智能混合模式'}}</text>
+            <text class="model-desc">{{language === 'en' ? '✅ Advanced algorithm • Comprehensive analysis • HD cover images' : '✅ 高级算法 • 全面分析 • 高清封面图片'}}</text>
           </view>
           <view class="model-indicator {{selectedModel === 'high-quality' ? 'active' : ''}}">
             <view class="indicator-dot"></view>
@@ -67,6 +67,15 @@
         </view>
       </label>
     </radio-group>
+  </view>
+
+  <!-- Info Section -->
+  <view class="info-section">
+    <text class="info-title">{{language === 'en' ? 'About Search Modes' : '关于搜索模式'}}</text>
+    <view class="info-list">
+      <text class="info-item">• {{language === 'en' ? 'Standard: Fast search through curated fly fishing content' : '标准搜索：快速检索精选的飞钓内容'}}</text>
+      <text class="info-item">• {{language === 'en' ? 'Premium: Deeper analysis with enhanced visuals' : '高级搜索：更深入的分析和增强的视觉效果'}}</text>
+    </view>
   </view>
 
   <!-- Back Button -->
