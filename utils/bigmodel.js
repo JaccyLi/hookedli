@@ -299,10 +299,9 @@ function generateArticleOutline(category, apiKey, language = 'en', onProgress = 
   return new Promise(async (resolve, reject) => {
     const categoryPrompts = categoryPromptsData
 
-    // Use GLM-4.7-FlashX for framework generation when glm-4.7 is selected
-    // FlashX is optimized for speed and efficiency in structural generation
-    const outlineModel = model === MODELS.GLM_4_7 ? MODELS.GLM_4_7_FLASHX : model
-    logger.log('[generateArticleOutline] Using model:', model, '→ Outline model:', outlineModel)
+    // Use DeepSeek-Chat for outline generation (fast and efficient)
+    const outlineModel = MODELS.DEEPSEEK_CHAT
+    logger.log('[generateArticleOutline] User model:', model, '→ Outline model:', outlineModel, '(DeepSeek-Chat for all)')
 
     // Use the category directly if it's not in the predefined list (custom input)
     // Otherwise use the predefined prompt
