@@ -730,6 +730,11 @@ Page({
       // Step 1: Expand all sections in parallel (faster than sequential)
       logger.log('[generateCard] Starting parallel expansion of', outline.sections.length, 'sections')
 
+      // Validate outline sections
+      if (!outline.sections || !Array.isArray(outline.sections) || outline.sections.length === 0) {
+        throw new Error('Invalid outline: no sections found')
+      }
+
       // Initialize streaming sections array for progress display
       const streamingSections = outline.sections.map((section, index) => ({
         index,
@@ -766,7 +771,7 @@ Page({
           // Update progress UI
           const updateProgress = (detail, completed = false) => {
             const currentStreaming = self.data.streamingSections
-            if (currentStreaming[index]) {
+            if (currentStreaming && currentStreaming[index]) {
               currentStreaming[index].model = sectionModel
               currentStreaming[index].completed = completed
               self.setData({
@@ -800,7 +805,7 @@ Page({
             resolve({
               index,
               expandedSection: {
-                intro: section.summary,
+                intro: section.summary || section.title,
                 subParagraphs: [],
                 imageUrl: ''
               }
@@ -810,8 +815,10 @@ Page({
       })
 
       // Wait for all sections to complete in parallel
+      logger.log('[generateCard] Waiting for all sections to complete...')
       const expandedSections = await Promise.all(expansionPromises)
       logger.log('[generateCard] All sections expanded in parallel')
+      logger.log('[generateCard] Expanded sections count:', expandedSections.length)
 
       this.setData({
         streamingActive: false

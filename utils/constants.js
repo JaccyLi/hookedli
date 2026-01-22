@@ -23,7 +23,7 @@ module.exports = {
     TOP_P: 0.95,
 
     // Article structure
-    DEFAULT_SECTION_COUNT: 5,
+    DEFAULT_SECTION_COUNT: 3,
     MIN_SUBPARAGRAPHS: 4,
     MAX_SUBPARAGRAPHS: 6,
     MIN_SUBPARAGRAPH_SENTENCES: 4,

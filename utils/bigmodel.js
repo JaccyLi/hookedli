@@ -473,8 +473,8 @@ Output ONLY the JSON object.`
       content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '')
       const outlineData = JSON.parse(content)
 
-      if (!outlineData.title || !outlineData.sections || !Array.isArray(outlineData.sections) || outlineData.sections.length !== 5) {
-        throw new Error('Invalid outline structure')
+      if (!outlineData.title || !outlineData.sections || !Array.isArray(outlineData.sections) || outlineData.sections.length < 3) {
+        throw new Error('Invalid outline structure: expected at least 3 sections')
       }
 
       if (onProgress) {
