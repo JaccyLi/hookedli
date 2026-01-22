@@ -519,25 +519,31 @@ Section Title: ${section.title}
 Section Sentences to Expand:
 ${sentencesText}
 
-Requirements:
+CRITICAL REQUIREMENTS:
+- You MUST expand ALL 3 sentences into detailed paragraphs
+- Do NOT skip any sentence or leave any paragraph incomplete
 - Write a brief introduction (1-2 sentences) that sets up the section
 - Expand EACH of the 3 sentences above into a detailed paragraph
-- Each expanded paragraph should be 4-8 sentences with in-depth information
+- Each expanded paragraph must be 4-8 sentences with in-depth information
+- Each paragraph must be substantial (minimum 100 words per paragraph)
 - Keep the same order as the input sentences
 - Content must be practical, actionable, and highly informative
 - Include specific techniques, tips, or examples
 - Use clear, professional language
-- IMPORTANT: Each paragraph MUST start with a number prefix (1., 2., 3.)
+- CRITICAL: Each paragraph MUST start with a number prefix (1., 2., 3.)
+- CRITICAL: You must return exactly 3 sub-paragraphs, no more, no less
 
-Output ONLY valid JSON in this format:
+Output ONLY valid JSON in this exact format:
 {
   "intro": "Brief introduction text...",
   "subParagraphs": [
-    "1. First expanded paragraph (from sentence 1)...",
-    "2. Second expanded paragraph (from sentence 2)...",
-    "3. Third expanded paragraph (from sentence 3)..."
+    "1. First expanded paragraph (from sentence 1) - must be 100+ words...",
+    "2. Second expanded paragraph (from sentence 2) - must be 100+ words...",
+    "3. Third expanded paragraph (from sentence 3) - must be 100+ words..."
   ]
-}`
+}
+
+Remember: ALL 3 paragraphs must be expanded with substantial content. Do not truncate or skip any paragraph.`
     : `你是一位资深的飞钓专家。将以下章节句子扩展为完整的文章章节。
 
 章节标题：${section.title}
@@ -545,25 +551,31 @@ Output ONLY valid JSON in this format:
 要扩展的章节句子：
 ${sentencesText}
 
-要求：
+关键要求：
+- 你必须将所有3个句子都扩展为详细段落
+- 不要跳过任何句子或留下任何段落不完整
 - 撰写简短介绍（1-2句话）作为章节开场
-- 将上述3个句子中的每一个扩展为详细段落
+- 将上述3个句子中的每一个都扩展为详细段落
 - 每个扩展段落应为4-8句话，包含深入信息
+- 每个段落必须内容充实（至少100字）
 - 保持与输入句子相同的顺序
 - 内容必须实用、可操作且信息丰富
 - 包含具体技巧、提示或示例
 - 使用清晰、专业的语言
-- 重要：每个段落必须以数字前缀开头（1.、2.、3.）
+- 关键：每个段落必须以数字前缀开头（1.、2.、3.）
+- 关键：你必须返回恰好3个子段落，不多不少
 
 只输出以下格式的有效JSON：
 {
   "intro": "简短介绍文本...",
   "subParagraphs": [
-    "1. 第一个扩展段落（来自句子1）...",
-    "2. 第二个扩展段落（来自句子2）...",
-    "3. 第三个扩展段落（来自句子3）..."
+    "1. 第一个扩展段落（来自句子1）- 必须100字以上...",
+    "2. 第二个扩展段落（来自句子2）- 必须100字以上...",
+    "3. 第三个扩展段落（来自句子3）- 必须100字以上..."
   ]
-}`
+}
+
+记住：所有3个段落都必须扩展为充实的内容。不要截断或跳过任何段落。`
 
   try {
     // Check if backend proxy is enabled
@@ -670,7 +682,7 @@ ${sentencesText}
       }
     }
 
-    // Ensure paragraphs are properly numbered
+    // Ensure paragraphs are properly numbered and validate quality
     const validParagraphs = (sectionData.subParagraphs || []).map((para, index) => {
       const expectedPrefix = `${index + 1}.`
       if (!para.startsWith(expectedPrefix)) {
@@ -680,21 +692,39 @@ ${sentencesText}
       return para
     })
 
-    // Ensure we have exactly 3 paragraphs
-    while (validParagraphs.length < 3) {
-      const index = validParagraphs.length
-      logger.warn(`[expandSection] Missing paragraph ${index + 1}, creating from sentence`)
-      validParagraphs.push(`${index + 1}. ${sentences[index] || ''}`)
+    // Validate paragraph count and quality
+    if (validParagraphs.length < 3) {
+      logger.error(`[expandSection] ERROR: Only ${validParagraphs.length} paragraphs returned, expected 3`)
+      logger.error('[expandSection] This indicates the API did not follow instructions properly')
+    }
+
+    // Check paragraph quality (word count)
+    validParagraphs.forEach((para, index) => {
+      const wordCount = para.split(/\s+/).length
+      if (wordCount < 50) {
+        logger.warn(`[expandSection] Paragraph ${index + 1} is too short (${wordCount} words), expected 100+`)
+      }
+    })
+
+    // Ensure we have exactly 3 paragraphs (use what we got, don't create empty ones)
+    const finalParagraphs = validParagraphs.slice(0, 3)
+
+    // If we still don't have 3 paragraphs, this is a critical failure
+    if (finalParagraphs.length < 3) {
+      logger.error(`[expandSection] CRITICAL: Only ${finalParagraphs.length} paragraphs available after validation`)
+      logger.error('[expandSection] Section:', section.title)
+      logger.error('[expandSection] This section will have incomplete content')
     }
 
     return {
       intro: sectionData.intro || sectionData.summary || section.title,
-      subParagraphs: validParagraphs.slice(0, 3),
+      subParagraphs: finalParagraphs,
       imagePrompt: section.imagePrompt
     }
   } catch (error) {
     logger.error('[expandSection] Error:', error)
     // Ultimate fallback: create numbered paragraphs from sentences
+    logger.error('[expandSection] Using ultimate fallback - paragraphs will NOT be expanded')
     return {
       intro: section.title,
       subParagraphs: sentences.map((s, i) => `${i + 1}. ${s}`),
