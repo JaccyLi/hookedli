@@ -199,6 +199,8 @@ app.post('/api/proxy/glm', authenticate, async (req, res) => {
 
     const { model, messages, temperature, top_p, max_tokens, stream } = req.body
 
+    console.log('[GLM Proxy] Request model:', model, 'Temperature:', temperature, 'Messages:', messages?.length)
+
     const response = await retryApiCall(async () => {
       return await axios.post(
         'https://open.bigmodel.cn/api/paas/v4/chat/completions',
@@ -220,9 +222,11 @@ app.post('/api/proxy/glm', authenticate, async (req, res) => {
       )
     }, 3) // Max 3 retries
 
+    console.log('[GLM Proxy] Success for model:', model)
     res.json(response.data)
   } catch (error) {
     console.error('[GLM Proxy Error]:', error.message)
+    console.error('[GLM Proxy Error] Requested model:', req.body.model)
     res.status(500).json({
       error: 'Failed to proxy request to GLM API',
       details: error.response?.data || error.message
@@ -240,6 +244,8 @@ app.post('/api/proxy/deepseek', authenticate, async (req, res) => {
     }
 
     const { model, messages, temperature, top_p, max_tokens, stream } = req.body
+
+    console.log('[DeepSeek Proxy] Request model:', model, 'Temperature:', temperature, 'Messages:', messages?.length)
 
     const response = await retryApiCall(async () => {
       return await axios.post(
@@ -262,9 +268,11 @@ app.post('/api/proxy/deepseek', authenticate, async (req, res) => {
       )
     }, 3) // Max 3 retries
 
+    console.log('[DeepSeek Proxy] Success for model:', model)
     res.json(response.data)
   } catch (error) {
     console.error('[DeepSeek Proxy Error]:', error.message)
+    console.error('[DeepSeek Proxy Error] Requested model:', req.body.model)
     res.status(500).json({
       error: 'Failed to proxy request to DeepSeek API',
       details: error.response?.data || error.message
@@ -324,6 +332,8 @@ app.post('/api/proxy/chat', authenticate, async (req, res) => {
   try {
     const { model } = req.body
 
+    console.log('[Unified Proxy] Received request for model:', model)
+
     if (!model) {
       return res.status(400).json({
         error: 'Model is required'
@@ -332,12 +342,15 @@ app.post('/api/proxy/chat', authenticate, async (req, res) => {
 
     // Route to appropriate proxy
     if (model === 'glm-4.7' || model === 'glm-4.7-flash' || model === 'glm-4.7-flashx') {
+      console.log('[Unified Proxy] Routing to GLM endpoint for model:', model)
       req.url = '/api/proxy/glm'
       return app._router.handle(req, res)
     } else if (model === 'deepseek-chat' || model === 'deepseek-reasoner') {
+      console.log('[Unified Proxy] Routing to DeepSeek endpoint for model:', model)
       req.url = '/api/proxy/deepseek'
       return app._router.handle(req, res)
     } else {
+      console.error('[Unified Proxy] Unknown model:', model)
       return res.status(400).json({
         error: `Unknown model: ${model}`
       })

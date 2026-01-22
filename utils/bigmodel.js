@@ -578,6 +578,7 @@ Output ONLY valid JSON in this format:
     if (useBackend) {
       // Try backend proxy first
       try {
+        logger.log('[expandSection] Calling backend with model:', expandModel, '(user selected:', model, ')')
         const response = await backendClient.expandSection({
           model: expandModel,
           messages: [
@@ -602,7 +603,7 @@ Output ONLY valid JSON in this format:
 
     // Fallback to direct API call if backend failed or was not enabled
     if (!content) {
-      logger.log('[expandSection] Using direct API call')
+      logger.log('[expandSection] Using direct API call with model:', expandModel, '(user selected:', model, ')')
       const apiConfig = getApiConfig(expandModel, apiKeys || { glmApiKey: apiKey, deepseekApiKey: '' })
 
       const requestPayload = {
