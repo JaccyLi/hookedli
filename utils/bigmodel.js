@@ -725,84 +725,49 @@ ${sentence}
 只输出以数字开头的扩展段落文本。`
 
   try {
-    // Check if backend proxy is enabled
-    const useBackend = backendClient.isBackendEnabled()
-    logger.log('[expandSentence] Using backend:', useBackend)
+    // Use backend proxy for sentence expansion
+    logger.log('[expandSentence] Calling backend proxy with model:', model)
 
-    let content = ''
+    const content = await backendClient.makeRequest('/api/proxy/chat', {
+      model: model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: language === 'en' ? 'Expand this sentence.' : '扩展此句子。' }
+      ],
+      temperature: 0.8,
+      top_p: 0.95,
+      max_tokens: 2048
+    })
 
-    if (useBackend) {
-      // Try backend proxy first
-      try {
-        logger.log('[expandSentence] Calling backend with model:', model)
-        const response = await backendClient.makeRequest('/api/proxy/chat', {
-          model: model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: language === 'en' ? 'Expand this sentence.' : '扩展此句子。' }
-          ],
-          temperature: 0.8,
-          top_p: 0.95,
-          max_tokens: 2048
-        })
-        content = response
-      } catch (backendError) {
-        logger.warn('[expandSentence] Backend failed, falling back to direct API:', backendError.message)
-      }
-    }
+    logger.log('[expandSentence] Backend response received')
 
-    // Fallback to direct API call if backend failed or was not enabled
-    if (!content) {
-      logger.log('[expandSentence] Using direct API call')
+    // The backend returns the content directly (not wrapped in choices)
+    let expandedContent = typeof content === 'string' ? content : content
 
-      const apiConfig = getApiConfig(model, apiKey, apiKeys)
-      if (!apiConfig) {
-        throw new Error(`Unsupported model: ${model}`)
-      }
-
-      const response = await new Promise((resolve, reject) => {
-        wx.request({
-          url: apiConfig.url,
-          method: 'POST',
-          header: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiConfig.key}`
-          },
-          data: {
-            model: apiConfig.model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: language === 'en' ? 'Expand this sentence.' : '扩展此句子。' }
-            ],
-            temperature: 0.8,
-            top_p: 0.95,
-            max_tokens: 2048
-          },
-          timeout: 60000,
-          success: resolve,
-          fail: reject
-        })
-      })
-
-      if (response.statusCode === 200 && response.data.choices && response.data.choices.length > 0) {
-        content = response.data.choices[0].message.content.trim()
-      } else {
-        throw new Error('Invalid API response')
-      }
+    // If it's the full API response format, extract the content
+    if (expandedContent.choices && expandedContent.choices.length > 0) {
+      expandedContent = expandedContent.choices[0].message.content
     }
 
     // Clean up the response
-    content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim()
+    expandedContent = expandedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim()
 
     // Ensure it starts with the correct number
-    if (!content.startsWith(`${sentenceIndex + 1}.`)) {
-      content = `${sentenceIndex + 1}. ${content}`
+    if (!expandedContent.startsWith(`${sentenceIndex + 1}.`)) {
+      expandedContent = `${sentenceIndex + 1}. ${expandedContent}`
     }
 
-    logger.log('[expandSentence] Completed, paragraph length:', content.length)
-    return content
+    logger.log('[expandSentence] Completed, paragraph length:', expandedContent.length)
+    return expandedContent
   } catch (error) {
     logger.error('[expandSentence] Error:', error)
+    logger.error('[expandSentence] Error details:', {
+      message: error.message,
+      stack: error.stack,
+      section: section.title,
+      sentenceIndex: sentenceIndex,
+      model: model
+    })
     // Fallback to original sentence with numbering
     return `${sentenceIndex + 1}. ${sentence}`
   }
