@@ -15,6 +15,7 @@ const helmet = require('helmet')
 const compression = require('compression')
 const rateLimit = require('express-rate-limit')
 const axios = require('axios')
+const { authenticate, verifyWeChatCode, generateToken } = require('./middleware/auth.js')
 
 const app = express()
 const HTTP_PORT = process.env.HTTP_PORT || 3000
@@ -119,8 +120,48 @@ app.get('/api/models', (req, res) => {
   res.json({ models })
 })
 
+// WeChat Mini Program login endpoint
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { code } = req.body
+
+    if (!code) {
+      return res.status(400).json({
+        error: 'Missing code',
+        message: 'WeChat login code is required'
+      })
+    }
+
+    // Verify code with WeChat server
+    const wechatData = await verifyWeChatCode(code)
+
+    if (!wechatData || !wechatData.openid) {
+      return res.status(401).json({
+        error: 'Authentication failed',
+        message: 'Invalid WeChat login code'
+      })
+    }
+
+    // Generate JWT token
+    const token = generateToken(wechatData.openid)
+
+    console.log(`[Auth] User logged in: ${wechatData.openid}`)
+
+    res.json({
+      token,
+      openid: wechatData.openid
+    })
+  } catch (error) {
+    console.error('[Auth] Login error:', error)
+    res.status(500).json({
+      error: 'Login failed',
+      message: error.message
+    })
+  }
+})
+
 // Proxy endpoint for GLM (BigModel) chat completions
-app.post('/api/proxy/glm', async (req, res) => {
+app.post('/api/proxy/glm', authenticate, async (req, res) => {
   try {
     if (!API_KEYS.BIGMODEL) {
       return res.status(400).json({
@@ -160,7 +201,7 @@ app.post('/api/proxy/glm', async (req, res) => {
 })
 
 // Proxy endpoint for DeepSeek chat completions
-app.post('/api/proxy/deepseek', async (req, res) => {
+app.post('/api/proxy/deepseek', authenticate, async (req, res) => {
   try {
     if (!API_KEYS.DEEPSEEK) {
       return res.status(400).json({
@@ -200,7 +241,7 @@ app.post('/api/proxy/deepseek', async (req, res) => {
 })
 
 // Proxy endpoint for image generation (BigModel CogView & GLM-Image)
-app.post('/api/proxy/image', async (req, res) => {
+app.post('/api/proxy/image', authenticate, async (req, res) => {
   try {
     if (!API_KEYS.BIGMODEL) {
       return res.status(400).json({
@@ -247,7 +288,7 @@ app.post('/api/proxy/image', async (req, res) => {
 })
 
 // Unified proxy endpoint (routes to appropriate API based on model)
-app.post('/api/proxy/chat', async (req, res) => {
+app.post('/api/proxy/chat', authenticate, async (req, res) => {
   try {
     const { model } = req.body
 

@@ -1,6 +1,7 @@
 /**
  * Backend Client Utility
  * Handles communication with the backend server
+ * Supports WeChat authentication with JWT tokens
  */
 
 const logger = require('./logger.js')
@@ -10,6 +11,114 @@ let healthCheckCache = {
   isHealthy: null,
   lastCheck: 0,
   cacheDuration: 60000 // 60 seconds cache
+}
+
+/**
+ * Get JWT token from storage
+ * @returns {string|null} JWT token or null
+ */
+function getToken() {
+  try {
+    return wx.getStorageSync('authToken') || null
+  } catch (error) {
+    logger.error('[Backend] Failed to get token:', error)
+    return null
+  }
+}
+
+/**
+ * Save JWT token to storage
+ * @param {string} token - JWT token
+ */
+function saveToken(token) {
+  try {
+    wx.setStorageSync('authToken', token)
+    logger.log('[Backend] Token saved')
+  } catch (error) {
+    logger.error('[Backend] Failed to save token:', error)
+  }
+}
+
+/**
+ * Clear JWT token from storage
+ */
+function clearToken() {
+  try {
+    wx.removeStorageSync('authToken')
+    logger.log('[Backend] Token cleared')
+  } catch (error) {
+    logger.error('[Backend] Failed to clear token:', error)
+  }
+}
+
+/**
+ * Login to backend using WeChat code
+ * @param {string} code - WeChat login code from wx.login()
+ * @returns {Promise<Object>} { token, openid }
+ */
+async function login(code) {
+  try {
+    const backendUrl = getBackendUrl()
+    if (!backendUrl) {
+      throw new Error('Backend not configured')
+    }
+
+    const response = await new Promise((resolve, reject) => {
+      wx.request({
+        url: `${backendUrl}/api/auth/login`,
+        method: 'POST',
+        data: { code },
+        header: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000,
+        success: resolve,
+        fail: reject
+      })
+    })
+
+    if (response.statusCode === 200 && response.data.token) {
+      saveToken(response.data.token)
+      logger.log('[Backend] Login successful')
+      return { token: response.data.token, openid: response.data.openid }
+    } else {
+      throw new Error(response.data.error || 'Login failed')
+    }
+  } catch (error) {
+    logger.error('[Backend] Login error:', error)
+    throw error
+  }
+}
+
+/**
+ * Ensure user is logged in
+ * @returns {Promise<string>} JWT token
+ */
+async function ensureLoggedIn() {
+  let token = getToken()
+
+  // If no token, try to login
+  if (!token) {
+    logger.log('[Backend] No token, logging in...')
+    try {
+      // Get WeChat login code
+      const code = await new Promise((resolve, reject) => {
+        wx.login({
+          success: (res) => resolve(res.code),
+          fail: reject
+        })
+      })
+
+      // Login to backend
+      const loginResult = await login(code)
+      token = loginResult.token
+    } catch (error) {
+      logger.error('[Backend] Auto-login failed:', error)
+      throw new Error('Authentication required. Please try again.')
+    }
+  }
+
+  return token
 }
 
 /**
@@ -70,56 +179,75 @@ function invalidateHealthCache() {
 }
 
 /**
- * Make request to backend
+ * Make request to backend with authentication
  * @param {string} endpoint - API endpoint (e.g., '/api/proxy/chat')
  * @param {Object} data - Request data
  * @param {string} method - HTTP method
+ * @param {boolean} requireAuth - Whether to require authentication (default: true)
  * @returns {Promise<Object>} Response data
  */
-function makeBackendRequest(endpoint, data = {}, method = 'POST') {
-  return new Promise((resolve, reject) => {
+async function makeBackendRequest(endpoint, data = {}, method = 'POST', requireAuth = true) {
+  try {
     const backendUrl = getBackendUrl()
 
     if (!backendUrl) {
-      reject(new Error('Backend not configured. Please configure backend URL in settings.'))
-      updateHealthCache(false)
-      return
+      throw new Error('Backend not configured. Please configure backend URL in settings.')
+    }
+
+    // Get token if authentication is required
+    let token = null
+    if (requireAuth) {
+      token = await ensureLoggedIn()
     }
 
     const url = `${backendUrl}${endpoint}`
+    const headers = {
+      'Content-Type': 'application/json'
+    }
 
-    logger.log('[Backend] Request:', { url, method, data })
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
 
-    wx.request({
-      url: url,
-      method: method,
-      data: data,
-      header: {
-        'Content-Type': 'application/json'
-      },
-      timeout: 120000,
-      success: (response) => {
-        logger.log('[Backend] Response:', { status: response.statusCode, data: response.data })
+    logger.log('[Backend] Request:', { url, method, hasAuth: !!token })
 
-        if (response.statusCode === 200) {
-          updateHealthCache(true)
-          resolve(response.data)
-        } else {
-          updateHealthCache(false)
-          reject(new Error(response.data.error || `Backend error: ${response.statusCode}`))
-        }
-      },
-      fail: (error) => {
-        logger.error('[Backend] Request failed:', error)
-        updateHealthCache(false)
-        reject(new Error(error.errMsg || 'Network error'))
-      }
+    const response = await new Promise((resolve, reject) => {
+      wx.request({
+        url: url,
+        method: method,
+        data: data,
+        header: headers,
+        timeout: 120000,
+        success: resolve,
+        fail: reject
+      })
     })
-  })
+
+    logger.log('[Backend] Response:', { status: response.statusCode })
+
+    // Handle authentication errors
+    if (response.statusCode === 401) {
+      clearToken()
+      throw new Error('Authentication expired. Please try again.')
+    }
+
+    if (response.statusCode === 200) {
+      updateHealthCache(true)
+      return response.data
+    } else {
+      updateHealthCache(false)
+      throw new Error(response.data.error || `Backend error: ${response.statusCode}`)
+    }
+  } catch (error) {
+    logger.error('[Backend] Request failed:', error)
+    updateHealthCache(false)
+    throw error
+  }
 }
 
 /**
- * Test backend connection
+ * Test backend connection (no authentication required)
  * @returns {Promise<boolean>} True if connection successful
  */
 async function testConnection() {
@@ -147,12 +275,12 @@ async function testConnection() {
 }
 
 /**
- * Get available models from backend
+ * Get available models from backend (no authentication required)
  * @returns {Promise<Array>} List of available models
  */
 async function getAvailableModels() {
   try {
-    const result = await makeBackendRequest('/api/models', {}, 'GET')
+    const result = await makeBackendRequest('/api/models', {}, 'GET', false)
     return result.models || []
   } catch (error) {
     logger.error('[Backend] Failed to get models:', error)
@@ -223,5 +351,11 @@ module.exports = {
   expandSection,
   generateImage,
   updateHealthCache,
-  invalidateHealthCache
+  invalidateHealthCache,
+  // Authentication functions
+  login,
+  getToken,
+  saveToken,
+  clearToken,
+  ensureLoggedIn
 }
