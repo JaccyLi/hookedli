@@ -166,6 +166,28 @@ app.post('/api/auth/login', async (req, res) => {
   }
 })
 
+// Helper function to retry API calls on rate limiting (429)
+async function retryApiCall(apiCall, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await apiCall()
+      return response
+    } catch (error) {
+      const isRateLimit = error.response?.status === 429
+      const isLastAttempt = attempt === maxRetries - 1
+
+      if (isRateLimit && !isLastAttempt) {
+        const waitTime = Math.pow(2, attempt) * 2000 // Exponential backoff: 2s, 4s, 8s
+        console.log(`[Rate Limit] Got 429, retrying in ${waitTime}ms... (attempt ${attempt + 1}/${maxRetries})`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+        continue
+      }
+
+      throw error // Re-throw if not rate limit or last attempt failed
+    }
+  }
+}
+
 // Proxy endpoint for GLM (BigModel) chat completions
 app.post('/api/proxy/glm', authenticate, async (req, res) => {
   try {
@@ -177,24 +199,26 @@ app.post('/api/proxy/glm', authenticate, async (req, res) => {
 
     const { model, messages, temperature, top_p, max_tokens, stream } = req.body
 
-    const response = await axios.post(
-      'https://open.bigmodel.cn/api/paas/v4/chat/completions',
-      {
-        model: model || 'glm-4.7',
-        messages,
-        temperature: temperature || 0.8,
-        top_p: top_p || 0.95,
-        max_tokens: max_tokens || 8192,
-        stream: stream || false
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEYS.BIGMODEL}`
+    const response = await retryApiCall(async () => {
+      return await axios.post(
+        'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+        {
+          model: model || 'glm-4.7',
+          messages,
+          temperature: temperature || 0.8,
+          top_p: top_p || 0.95,
+          max_tokens: max_tokens || 8192,
+          stream: stream || false
         },
-        timeout: 300000 // 5 minutes
-      }
-    )
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEYS.BIGMODEL}`
+          },
+          timeout: 300000 // 5 minutes
+        }
+      )
+    }, 3) // Max 3 retries
 
     res.json(response.data)
   } catch (error) {
@@ -217,24 +241,26 @@ app.post('/api/proxy/deepseek', authenticate, async (req, res) => {
 
     const { model, messages, temperature, top_p, max_tokens, stream } = req.body
 
-    const response = await axios.post(
-      'https://api.deepseek.com/v1/chat/completions',
-      {
-        model: model || 'deepseek-chat',
-        messages,
-        temperature: temperature || 0.8,
-        top_p: top_p || 0.95,
-        max_tokens: max_tokens || 8192,
-        stream: stream || false
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEYS.DEEPSEEK}`
+    const response = await retryApiCall(async () => {
+      return await axios.post(
+        'https://api.deepseek.com/v1/chat/completions',
+        {
+          model: model || 'deepseek-chat',
+          messages,
+          temperature: temperature || 0.8,
+          top_p: top_p || 0.95,
+          max_tokens: max_tokens || 8192,
+          stream: stream || false
         },
-        timeout: 300000 // 5 minutes
-      }
-    )
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEYS.DEEPSEEK}`
+          },
+          timeout: 300000 // 5 minutes
+        }
+      )
+    }, 3) // Max 3 retries
 
     res.json(response.data)
   } catch (error) {

@@ -750,7 +750,7 @@ Page({
 
         // Add delay between requests to avoid rate limiting (except for last section)
         if (index < outline.sections.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000)) // 2 second delay
+          await new Promise(resolve => setTimeout(resolve, 5000)) // 5 second delay to avoid 429 errors
         }
       }
       logger.log('[generateCard] All sections expanded')
