@@ -716,6 +716,11 @@ Page({
         return
       }
 
+      // Log outline structure for debugging
+      logger.log('[generateCard] Outline generated successfully')
+      logger.log('[generateCard] Outline sections count:', outline.sections?.length)
+      logger.log('[generateCard] Outline sections:', JSON.stringify(outline.sections?.map(s => ({ title: s.title, index: s.index }))))
+
       this.setData({
         loadingStep: isEn ? 'Compiling content...' : '编译内容中...',
         loadingTip: isEn ? 'Gathering information' : '收集信息',
@@ -774,6 +779,8 @@ Page({
           updateProgress(isEn ? `Searching section ${index + 1}...` : `正在查找第 ${index + 1} 章节...`)
 
           try {
+            logger.log(`[generateCard] Calling expandSection for section ${index + 1}, model: ${sectionModel}`)
+
             // Use regular HTTP expansion (reliable, no WebSocket issues)
             const expandedSection = await expandSection(section, apiKey, self.data.language, sectionModel, apiKeys)
             logger.log(`[generateCard] Section ${index + 1} expanded successfully`)
@@ -782,6 +789,12 @@ Page({
             resolve({ index, expandedSection })
           } catch (error) {
             logger.error(`[generateCard] Section ${index + 1} expansion failed:`, error)
+            logger.error(`[generateCard] Error details:`, {
+              message: error.message,
+              stack: error.stack,
+              section: section.title,
+              model: sectionModel
+            })
             // Return fallback section with summary only
             updateProgress(isEn ? `Section ${index + 1} failed` : `第 ${index + 1} 章节失败`, true)
             resolve({
