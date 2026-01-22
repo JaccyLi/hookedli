@@ -299,10 +299,6 @@ function generateArticleOutline(category, apiKey, language = 'en', onProgress = 
   return new Promise(async (resolve, reject) => {
     const categoryPrompts = categoryPromptsData
 
-    // Use DeepSeek-Reasoner for outline generation (highest quality framework)
-    const outlineModel = MODELS.DEEPSEEK_REASONER
-    logger.log('[generateArticleOutline] User model:', model, '→ Outline model:', outlineModel, '(DeepSeek-Reasoner for all)')
-
     // Use the category directly if it's not in the predefined list (custom input)
     // Otherwise use the predefined prompt
     const topic = categoryPrompts[language][category] || category
@@ -312,8 +308,9 @@ function generateArticleOutline(category, apiKey, language = 'en', onProgress = 
     logger.log('[generateArticleOutline] topic used:', topic)
     logger.log('[generateArticleOutline] categoryLabel:', categoryLabel)
 
-    const systemPrompt = language === 'en'
-      ? `You are an expert fly fishing writer. Create a comprehensive article outline about ${topic}.
+    // Use DeepSeek-Chat for outline generation (fast and efficient framework)
+    const outlineModel = MODELS.DEEPSEEK_CHAT
+    logger.log('[generateArticleOutline] User model:', model, '→ Outline model:', outlineModel, '(DeepSeek-Chat for fast framework)')
 
 !!! WARNING: SUMMARY WORD COUNT LIMIT - 5 TO 10 WORDS MAXIMUM !!!
 
@@ -513,10 +510,10 @@ async function expandSection(section, apiKey, language = 'en', model = 'glm-4.7'
   logger.log('[expandSection] Language:', language)
   logger.log('[expandSection] Model:', model)
 
-  // Use GLM-4.7-Flash for content expansion when glm-4.7 is selected
-  // Flash is optimized for speed and efficiency in content generation
-  const expandModel = model === MODELS.GLM_4_7 ? MODELS.GLM_4_7_FLASH : model
-  logger.log('[expandSection] Using model:', model, '→ Expansion model:', expandModel)
+  // Use the exact model specified (no Flash substitution)
+  // User wants GLM-4.7, not GLM-4.7-Flash
+  const expandModel = model
+  logger.log('[expandSection] Using model:', expandModel)
 
   const systemPrompt = language === 'en'
     ? `You are an expert fly fishing writer. Expand the following section summary into a complete section.
