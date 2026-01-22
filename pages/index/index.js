@@ -742,16 +742,19 @@ Page({
           sectionModel = 'deepseek-reasoner'
           logger.log(`[generateCard] Section ${index + 1} using: DeepSeek-Reasoner (high quality mode)`)
         } else {
-          // Default mode: Smart distribution for optimal performance
+          // Default mode: Fixed model assignment for 3 sections
           if (index === 0) {
-            // First section: DeepSeek-Chat (fast, starts the article)
+            // Section 1: DeepSeek-Reasoner (highest quality for first section)
+            sectionModel = 'deepseek-reasoner'
+            logger.log(`[generateCard] Section ${index + 1} using: DeepSeek-Reasoner (default mode)`)
+          } else if (index === 1) {
+            // Section 2: DeepSeek-Chat (fast and good quality)
             sectionModel = 'deepseek-chat'
             logger.log(`[generateCard] Section ${index + 1} using: DeepSeek-Chat (default mode)`)
           } else {
-            // Remaining sections: GLM-4.7 (one per available key)
-            // Backend will rotate through multiple keys automatically
+            // Section 3: GLM-4.7 (reliable quality)
             sectionModel = 'glm-4.7'
-            logger.log(`[generateCard] Section ${index + 1} using: GLM-4.7 (default mode, will use key ${index + 1}/${getApp().globalData.bigModelKeyCount || 1} in backend)`)
+            logger.log(`[generateCard] Section ${index + 1} using: GLM-4.7 (default mode)`)
           }
         }
 

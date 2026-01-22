@@ -327,7 +327,7 @@ Required Structure:
       "summary": "5-10 words ONLY - NO MORE",
       "imagePrompt": "Detailed image description for this section"
     },
-    ... (5 sections total)
+    ... (3 sections total)
   ],
   "references": [
     {"title": "Reference title", "url": "https://example.com"}
@@ -335,7 +335,7 @@ Required Structure:
 }
 
 REQUIREMENTS:
-- Create exactly 5 sections covering different aspects of the topic
+- Create exactly 3 sections covering different aspects of the topic
 - !!! SUMMARY LIMIT: 5-10 WORDS ABSOLUTE MAXIMUM !!!
 - Count EVERY word - if summary has 11+ words, it's WRONG
 - GOOD examples (5-10 words):
@@ -364,7 +364,7 @@ Output ONLY the JSON object.`
       "summary": "只许5-10个单词 - 不能再多",
       "imagePrompt": "本节的详细图片描述"
     },
-    ... (共5个章节)
+    ... (共3个章节)
   ],
   "references": [
     {"title": "参考标题", "url": "https://example.com"}
@@ -372,7 +372,7 @@ Output ONLY the JSON object.`
 }
 
 要求：
-- 创建正好5个章节，涵盖主题的不同方面
+- 创建正好3个章节，涵盖主题的不同方面
 - !!! 摘要限制：绝对最多5-10个单词 !!!
 - 每个单词都要数 - 如果摘要有11个或更多单词，就是错的
 - 好的例子（5-10个单词）：
