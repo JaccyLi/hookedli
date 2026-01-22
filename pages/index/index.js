@@ -719,15 +719,40 @@ Page({
         loadingDetail: isEn ? `Retrieving details...` : `获取详细信息...`
       })
 
-      // Step 1: Expand all section content in parallel
-      const expansionPromises = outline.sections.map(async (section, index) => {
-        logger.log(`[generateCard] Expanding section ${index + 1}:`, section.title)
-        const expandedSection = await expandSection(section, apiKey, self.data.language, selectedModel, apiKeys)
-        logger.log(`[generateCard] Section ${index + 1} expanded, subParagraphs count:`, expandedSection.subParagraphs?.length || 0)
-        return { index, expandedSection }
-      })
+      // Step 1: Expand sections sequentially with delays to avoid rate limiting
+      const expandedSections = []
+      for (let index = 0; index < outline.sections.length; index++) {
+        if (self.data.shouldCancel) return
 
-      const expandedSections = await Promise.all(expansionPromises)
+        const section = outline.sections[index]
+        logger.log(`[generateCard] Expanding section ${index + 1}/${outline.sections.length}:`, section.title)
+
+        self.setData({
+          loadingDetail: isEn ? `Section ${index + 1}/${outline.sections.length}...` : `第 ${index + 1}/${outline.sections.length} 节...`
+        })
+
+        try {
+          const expandedSection = await expandSection(section, apiKey, self.data.language, selectedModel, apiKeys)
+          logger.log(`[generateCard] Section ${index + 1} expanded, subParagraphs count:`, expandedSection.subParagraphs?.length || 0)
+          expandedSections.push({ index, expandedSection })
+        } catch (error) {
+          logger.error(`[generateCard] Section ${index + 1} expansion failed:`, error)
+          // Add failed section with empty content
+          expandedSections.push({
+            index,
+            expandedSection: {
+              intro: section.summary,
+              subParagraphs: [],
+              imageUrl: ''
+            }
+          })
+        }
+
+        // Add delay between requests to avoid rate limiting (except for last section)
+        if (index < outline.sections.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000)) // 2 second delay
+        }
+      }
       logger.log('[generateCard] All sections expanded')
 
       // Step 2: Generate all images in parallel

@@ -192,7 +192,7 @@ app.post('/api/proxy/glm', authenticate, async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${API_KEYS.BIGMODEL}`
         },
-        timeout: 120000
+        timeout: 300000 // 5 minutes
       }
     )
 
@@ -232,7 +232,7 @@ app.post('/api/proxy/deepseek', authenticate, async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${API_KEYS.DEEPSEEK}`
         },
-        timeout: 120000
+        timeout: 300000 // 5 minutes
       }
     )
 
