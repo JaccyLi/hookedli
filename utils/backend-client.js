@@ -218,7 +218,7 @@ async function makeBackendRequest(endpoint, data = {}, method = 'POST', requireA
         method: method,
         data: data,
         header: headers,
-        timeout: 300000, // 5 minutes
+        timeout: 120000,
         success: resolve,
         fail: reject
       })

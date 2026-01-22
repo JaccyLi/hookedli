@@ -714,28 +714,42 @@ Page({
       }
 
       this.setData({
+        loadingStep: isEn ? 'Compiling content...' : '编译内容中...',
+        loadingTip: isEn ? 'Gathering information' : '收集信息',
+        loadingDetail: isEn ? `Retrieving details...` : `获取详细信息...`
+      })
+
+      // Step 1: Expand all section content in parallel
+      const expansionPromises = outline.sections.map(async (section, index) => {
+        logger.log(`[generateCard] Expanding section ${index + 1}:`, section.title)
+        const expandedSection = await expandSection(section, apiKey, self.data.language, selectedModel, apiKeys)
+        logger.log(`[generateCard] Section ${index + 1} expanded, subParagraphs count:`, expandedSection.subParagraphs?.length || 0)
+        return { index, expandedSection }
+      })
+
+      const expandedSections = await Promise.all(expansionPromises)
+      logger.log('[generateCard] All sections expanded')
+
+      // Step 2: Generate all images in parallel
+      this.setData({
         loadingStep: isEn ? 'Loading images...' : '加载图片中...',
         loadingTip: isEn ? 'Fetching visual content' : '获取视觉内容',
         loadingDetail: isEn ? 'Loading images for all sections...' : '加载所有章节图片...'
       })
 
-      // Generate all images in parallel (using outline sections directly, no expansion)
-      const imagePromises = outline.sections.map(async (section, index) => {
+      const imagePromises = expandedSections.map(async ({ index, expandedSection }) => {
         let imageUrl = ''
         try {
-          imageUrl = await generateImage(section.imagePrompt, apiKey)
+          imageUrl = await generateImage(outline.sections[index].imagePrompt, apiKey)
           logger.log(`[Section ${index + 1}] Image generated`)
         } catch (error) {
           logger.error(`[Section ${index + 1}] Image generation failed:`, error)
         }
 
-        // Use outline section directly without expansion
-        const finalSection = {
-          intro: section.summary,
-          subParagraphs: [], // No expanded content, just the summary
+        const finalSection = Object.assign({}, expandedSection, {
           imageUrl: imageUrl
-        }
-        logger.log(`[generateCard] Section ${index + 1} processed (no expansion)`)
+        })
+        logger.log(`[generateCard] Section ${index + 1} final subParagraphs count:`, finalSection.subParagraphs?.length || 0)
         return finalSection
       })
 
@@ -748,6 +762,9 @@ Page({
 
       logger.log('[generateCard] All sections processed')
       logger.log('[generateCard] Total paragraphs count:', paragraphs.length)
+      paragraphs.forEach((para, index) => {
+        logger.log(`[generateCard] Final paragraph ${index + 1} subParagraphs count:`, para.subParagraphs?.length || 0)
+      })
 
       if (self.data.shouldCancel) {
         return
