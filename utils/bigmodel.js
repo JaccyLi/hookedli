@@ -315,8 +315,6 @@ function generateArticleOutline(category, apiKey, language = 'en', onProgress = 
     const systemPrompt = language === 'en'
       ? `You are an expert fly fishing writer. Create a comprehensive article outline about ${topic}.
 
-!!! WARNING: SUMMARY WORD COUNT LIMIT - 5 TO 10 WORDS MAXIMUM !!!
-
 Required Structure:
 {
   "title": "Article title (50-100 characters)",
@@ -324,7 +322,13 @@ Required Structure:
     {
       "index": 1,
       "title": "Section 1 brief title",
-      "summary": "5-10 words ONLY - NO MORE",
+      "sentences": [
+        "First key point about this section (10-15 words)",
+        "Second key point about this section (10-15 words)",
+        "Third key point about this section (10-15 words)",
+        "Fourth key point about this section (10-15 words)",
+        "Fifth key point about this section (10-15 words)"
+      ],
       "imagePrompt": "Detailed image description for this section"
     },
     ... (3 sections total)
@@ -336,23 +340,14 @@ Required Structure:
 
 REQUIREMENTS:
 - Create exactly 3 sections covering different aspects of the topic
-- !!! SUMMARY LIMIT: 5-10 WORDS ABSOLUTE MAXIMUM !!!
-- Count EVERY word - if summary has 11+ words, it's WRONG
-- GOOD examples (5-10 words):
-  * "Master basic casting techniques" (4 words)
-  * "Select essential fishing gear" (4 words)
-  * "Learn proper fly selection" (4 words)
-- BAD examples (TOO LONG):
-  * "Learn how to cast your fly accurately" (7 words - acceptable)
-  * "Master the art of fly casting with these proven techniques for beginners" (12 words - WRONG, TOO LONG)
-- Keep summaries ULTRA SHORT - like headlines, not descriptions
+- Each section MUST have exactly 5 sentences
+- Each sentence should be 10-15 words
+- Sentences should outline key points to be expanded into paragraphs later
 - Image prompts should describe professional fly fishing photography
 - Include 3-5 real reference URLs
 
 Output ONLY the JSON object.`
       : `你是一位资深的飞钓专家。请创作关于${topic}的文章大纲。
-
-!!! 警告：摘要字数限制 - 最多5到10个单词 !!!
 
 要求的结构：
 {
@@ -361,7 +356,13 @@ Output ONLY the JSON object.`
     {
       "index": 1,
       "title": "第1节简短标题",
-      "summary": "只许5-10个单词 - 不能再多",
+      "sentences": [
+        "关于本节的第一个要点（10-15个词）",
+        "关于本节的第二个要点（10-15个词）",
+        "关于本节的第三个要点（10-15个词）",
+        "关于本节的第四个要点（10-15个词）",
+        "关于本节的第五个要点（10-15个词）"
+      ],
       "imagePrompt": "本节的详细图片描述"
     },
     ... (共3个章节)
@@ -373,18 +374,11 @@ Output ONLY the JSON object.`
 
 要求：
 - 创建正好3个章节，涵盖主题的不同方面
-- !!! 摘要限制：绝对最多5-10个单词 !!!
-- 每个单词都要数 - 如果摘要有11个或更多单词，就是错的
-- 好的例子（5-10个单词）：
-  * "掌握基本抛投技巧"（4个词）
-  * "选择必要钓鱼装备"（4个词）
-  * "学习正确拟饵选择"（4个词）
-- 坏的例子（太长了）：
-  * "学习如何准确抛出你的拟饵"（7个词 - 可以接受）
-  * "通过这些经过验证的技术掌握飞钓艺术适合初学者"（12个词 - 错误，太长了）
-- 保持摘要超级短 - 像标题，不是描述
-- 图片提示词应描述专业飞钓摄影
-- 包含3-5个真实参考URL
+- 每个章节必须有5个句子
+- 每个句子应该是10-15个词
+- 句子应该概述稍后要扩展成段落的关键点
+- 图片提示应该描述专业的飞钓摄影
+- 包括3-5个真实的参考URL
 
 只输出JSON对象。`
 
@@ -477,6 +471,13 @@ Output ONLY the JSON object.`
         throw new Error('Invalid outline structure: expected at least 3 sections')
       }
 
+      // Validate each section has 5 sentences
+      for (const section of outlineData.sections) {
+        if (!section.sentences || !Array.isArray(section.sentences) || section.sentences.length !== 5) {
+          throw new Error(`Invalid section structure: expected 5 sentences in section "${section.title}"`)
+        }
+      }
+
       if (onProgress) {
         onProgress({
           stage: 'outline_complete',
@@ -500,8 +501,8 @@ Output ONLY the JSON object.`
 }
 
 /**
- * Expand a single section summary into full content
- * @param {Object} section - Section with index, title, summary, imagePrompt
+ * Expand a single section with sentences into full content
+ * @param {Object} section - Section with index, title, sentences, imagePrompt
  * @param {string} apiKey - API key (deprecated, backend used when available)
  * @param {string} language - Language
  * @param {string} model - Model to use
@@ -518,53 +519,63 @@ async function expandSection(section, apiKey, language = 'en', model = 'glm-4.7'
   const expandModel = model
   logger.log('[expandSection] Using model:', expandModel)
 
+  // Get sentences from section
+  const sentences = section.sentences || []
+  const sentencesText = sentences.map((s, i) => `${i + 1}. ${s}`).join('\n')
+
   const systemPrompt = language === 'en'
-    ? `You are an expert fly fishing writer. Expand the following section summary into a complete section.
+    ? `You are an expert fly fishing writer. Expand the following section sentences into a complete article section.
 
 Section Title: ${section.title}
-Section Summary: ${section.summary}
+
+Section Sentences to Expand:
+${sentencesText}
 
 Requirements:
-- Write an introduction (2-4 sentences expanding on the summary)
-- Create 4-6 detailed sub-paragraphs
-- Each sub-paragraph should be 4-8 sentences with in-depth information
-- Start each sub-paragraph with a number prefix like "1. ", "2. ", "3. " etc.
+- Write a brief introduction (1-2 sentences) that sets up the section
+- Expand EACH of the 5 sentences above into a detailed paragraph
+- Each expanded paragraph should be 4-8 sentences with in-depth information
+- Keep the same order as the input sentences
 - Content must be practical, actionable, and highly informative
 - Include specific techniques, tips, or examples
 - Use clear, professional language
-- CRITICAL: If the intro text contains numbered points or sections, use Roman numerals (I., II., III., IV., V., VI., etc.) instead of Arabic numbers (1., 2., 3.)
 
 Output ONLY valid JSON in this format:
 {
-  "intro": "Introduction text here. If you include numbered points in the intro, use Roman numerals like I., II., III., IV., V., VI.",
+  "intro": "Brief introduction text...",
   "subParagraphs": [
-    "1. First detailed point with comprehensive information...",
-    "2. Second detailed point with comprehensive information...",
-    "3. Third detailed point with comprehensive information..."
+    "First expanded paragraph (from sentence 1)...",
+    "Second expanded paragraph (from sentence 2)...",
+    "Third expanded paragraph (from sentence 3)...",
+    "Fourth expanded paragraph (from sentence 4)...",
+    "Fifth expanded paragraph (from sentence 5)..."
   ]
 }`
-    : `你是一位资深的飞钓专家。将以下章节摘要扩展为完整章节。
+    : `你是一位资深的飞钓专家。将以下章节句子扩展为完整的文章章节。
 
 章节标题：${section.title}
-章节摘要：${section.summary}
+
+要扩展的章节句子：
+${sentencesText}
 
 要求：
-- 撰写介绍（2-4句话，扩展摘要）
-- 创建4-6个详细子段落
-- 每个子段落应为4-8句话，包含深入信息
-- 每个子段落以数字前缀开头，如"1. "、"2. "、"3. "等
+- 撰写简短介绍（1-2句话）作为章节开场
+- 将上述5个句子中的每一个扩展为详细段落
+- 每个扩展段落应为4-8句话，包含深入信息
+- 保持与输入句子相同的顺序
 - 内容必须实用、可操作且信息丰富
 - 包含具体技巧、提示或示例
 - 使用清晰、专业的语言
-- 关键：如果介绍文本中包含编号要点或章节，请使用罗马数字（I.、II.、III.、IV.、V.、VI. 等）而不是阿拉伯数字（1.、2.、3.）
 
 只输出以下格式的有效JSON：
 {
-  "intro": "介绍文本... 如果您在介绍中包含编号要点，请使用罗马数字，如 I.、II.、III.、IV.、V.、VI.",
+  "intro": "简短介绍文本...",
   "subParagraphs": [
-    "1. 第一个详细要点，包含全面信息...",
-    "2. 第二个详细要点，包含全面信息...",
-    "3. 第三个详细要点，包含全面信息..."
+    "第一个扩展段落（来自句子1）...",
+    "第二个扩展段落（来自句子2）...",
+    "第三个扩展段落（来自句子3）...",
+    "第四个扩展段落（来自句子4）...",
+    "第五个扩展段落（来自句子5）..."
   ]
 }`
 
