@@ -652,23 +652,50 @@ ${sentencesText}
     function parseTextResponse(text) {
       const isEnglish = language === 'en'
 
-      // Define patterns for English and Chinese
-      const introPattern = isEnglish ? /^INTRO:\s*(.+?)$/im : /^介绍：\s*(.+?)$/im
-      const paragraphPattern = isEnglish ? /^PARAGRAPH\s+(\d+):\s*(.+?)$/im : /^段落(\d+)：\s*(.+?)$/im
+      // Define delimiters for English and Chinese
+      const introDelimiter = isEnglish ? 'INTRO:' : '介绍：'
+      const paragraphDelimiter = isEnglish ? 'PARAGRAPH' : '段落'
 
-      // Extract intro
-      const introMatch = text.match(introPattern)
-      const intro = introMatch ? introMatch[1].trim() : section.title
+      // Extract intro - get everything after INTRO: until first PARAGRAPH
+      let intro = section.title
+      const introIndex = text.indexOf(introDelimiter)
+      if (introIndex !== -1) {
+        const afterIntro = text.substring(introIndex + introDelimiter.length)
+        const firstParagraphIndex = afterIntro.indexOf(paragraphDelimiter)
+        if (firstParagraphIndex !== -1) {
+          intro = afterIntro.substring(0, firstParagraphIndex).trim()
+        } else {
+          intro = afterIntro.trim()
+        }
+      }
 
-      // Extract paragraphs using match with global flag
+      // Extract paragraphs - split by paragraph delimiter
       const paragraphs = []
-      const paragraphPatternWithGlobal = new RegExp(paragraphPattern.source, paragraphPattern.flags + 'g')
-      let match
+      const lines = text.split('\n')
+      let currentParagraph = null
+      let currentContent = []
 
-      while ((match = paragraphPatternWithGlobal.exec(text)) !== null) {
-        const num = parseInt(match[1])
-        const content = match[2].trim()
-        paragraphs[num - 1] = `${num}. ${content}` // Add number prefix
+      for (const line of lines) {
+        // Check if this line starts a new paragraph
+        const colon = isEnglish ? ':' : '：'
+        const paragraphMatch = line.match(new RegExp(`^${paragraphDelimiter}(\\d+)${colon}`))
+        if (paragraphMatch) {
+          // Save previous paragraph if exists
+          if (currentParagraph !== null) {
+            paragraphs[currentParagraph] = `${currentParagraph + 1}. ${currentContent.join(' ').trim()}`
+          }
+          // Start new paragraph
+          currentParagraph = parseInt(paragraphMatch[1]) - 1
+          currentContent = [line.substring(paragraphMatch[0].length).trim()]
+        } else if (currentParagraph !== null && line.trim()) {
+          // Add line to current paragraph
+          currentContent.push(line.trim())
+        }
+      }
+
+      // Don't forget the last paragraph
+      if (currentParagraph !== null && currentContent.length > 0) {
+        paragraphs[currentParagraph] = `${currentParagraph + 1}. ${currentContent.join(' ').trim()}`
       }
 
       // Fill in missing paragraphs if any
