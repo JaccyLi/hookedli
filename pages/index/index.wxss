@@ -1252,17 +1252,3 @@ page {
   font-weight: 600;
   color: #666666;
 }
-
-.streaming-section-content {
-  width: 100%;
-  min-height: 120rpx;
-}
-
-.streaming-text {
-  font-size: 26rpx;
-  line-height: 1.6;
-  color: #333333;
-  word-break: break-word;
-  white-space: pre-wrap;
-  display: block;
-}
