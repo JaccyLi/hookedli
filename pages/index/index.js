@@ -829,51 +829,36 @@ Page({
         imageUrl: ''
       }))
 
-      // First batch: Hero image + Section 1 image (parallel)
+      // Generate all 4 images in parallel (hero + 3 sections)
+      // CogView-3-Flash rate limit is 4, so we can do all at once
       this.setData({
-        loadingDetail: isEn ? 'Searching images (batch 1/2)...' : '正在查找图片（第1批，共2批）...'
+        loadingDetail: isEn ? 'Searching images (4 parallel)...' : '正在查找图片（4个并行）...'
       })
 
       let heroImageUrl = null
-      const batch1Promises = [
-        generateImage(outline.sections[0].imagePrompt, apiKey).then(url => {
-          if (url) {
-            paragraphs[0].imageUrl = url
-            logger.log('[Section 1] Image generated (batch 1)')
-          }
-        }).catch(err => logger.error('[Section 1] Image generation failed:', err)),
+      const allImagePromises = [
+        // Hero image
         generateHeroImage(outline.title, outline.originalCategory, apiKey).then(url => {
           heroImageUrl = url
           if (url) {
-            logger.log('[Hero] Image generated (batch 1)')
+            logger.log('[Hero] Image generated (parallel)')
           }
         }).catch(err => {
           logger.error('[Hero] Image generation failed:', err)
           heroImageUrl = null
-        })
-      ]
-
-      await Promise.all(batch1Promises)
-
-      // Second batch: Section 2 + Section 3 images (parallel)
-      if (expandedSections.length > 1) {
-        this.setData({
-          loadingDetail: isEn ? 'Searching images (batch 2/2)...' : '正在查找图片（第2批，共2批）...'
-        })
-
-        const batch2Promises = []
-        for (let i = 1; i < expandedSections.length; i++) {
-          const promise = generateImage(outline.sections[i].imagePrompt, apiKey).then(url => {
+        }),
+        // All section images (parallel)
+        ...expandedSections.map((section, i) =>
+          generateImage(outline.sections[i].imagePrompt, apiKey).then(url => {
             if (url) {
               paragraphs[i].imageUrl = url
-              logger.log(`[Section ${i + 1}] Image generated (batch 2)`)
+              logger.log(`[Section ${i + 1}] Image generated (parallel)`)
             }
           }).catch(err => logger.error(`[Section ${i + 1}] Image generation failed:`, err))
-          batch2Promises.push(promise)
-        }
+        )
+      ]
 
-        await Promise.all(batch2Promises)
-      }
+      await Promise.all(allImagePromises)
 
       // Reattach expanded content to paragraphs
       expandedSections.forEach(({ index, expandedSection }, i) => {
@@ -886,7 +871,7 @@ Page({
         })
       })
 
-      logger.log('[generateCard] All images generated in batches')
+      logger.log('[generateCard] All 4 images generated in parallel')
       logger.log('[generateCard] Total paragraphs count:', paragraphs.length)
       paragraphs.forEach((para, index) => {
         logger.log(`[generateCard] Final paragraph ${index + 1} subParagraphs count:`, para.subParagraphs?.length || 0)
