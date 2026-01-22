@@ -21,6 +21,22 @@ async function verifyWeChatCode(code) {
     const axios = require('axios')
     const url = 'https://api.weixin.qq.com/sns/jscode2session'
 
+    // Debug: Check if credentials are loaded
+    console.log('[WeChat Auth] Credentials check:', {
+      appId: WECHAT_APP_ID ? `${WECHAT_APP_ID.substring(0, 10)}...` : 'MISSING',
+      appIdLength: WECHAT_APP_ID?.length || 0,
+      secretLength: WECHAT_APP_SECRET?.length || 0,
+      code: code ? `${code.substring(0, 10)}...` : 'MISSING'
+    })
+
+    if (!WECHAT_APP_ID || !WECHAT_APP_SECRET) {
+      console.error('[WeChat Auth] MISSING CREDENTIALS:', {
+        hasAppId: !!WECHAT_APP_ID,
+        hasSecret: !!WECHAT_APP_SECRET
+      })
+      return null
+    }
+
     const response = await axios.get(url, {
       params: {
         appid: WECHAT_APP_ID,
