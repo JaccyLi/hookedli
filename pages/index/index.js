@@ -651,7 +651,6 @@ Page({
       jokeText: '',
       loadingTitle: isEn ? 'Searching Articles' : '正在搜索文章',
       loadingStep: isEn ? 'Searching database...' : '搜索数据库中...',
-      loadingTip: isEn ? 'Finding relevant content' : '查找相关内容',
       loadingDetail: ''
     })
 
@@ -695,7 +694,6 @@ Page({
 
       this.setData({
         loadingStep: isEn ? 'Finding results...' : '查找结果中...',
-        loadingTip: isEn ? 'Matching articles' : '匹配文章',
         loadingDetail: ''
       })
 
@@ -728,7 +726,6 @@ Page({
 
       this.setData({
         loadingStep: isEn ? 'Compiling content...' : '编译内容中...',
-        loadingTip: isEn ? 'Gathering information' : '收集信息',
         loadingDetail: isEn ? `Searching sections (parallel)...` : `正在搜索章节（并行）...`
       })
 
@@ -820,7 +817,6 @@ Page({
       // Step 2: Generate images in batches of 2 (parallel within batch, sequential between batches)
       this.setData({
         loadingStep: isEn ? 'Loading images...' : '加载图片中...',
-        loadingTip: isEn ? 'Fetching visual content' : '获取视觉内容',
         loadingDetail: isEn ? 'Searching images for all sections...' : '正在查找所有章节图片...'
       })
 
