@@ -760,107 +760,58 @@ Page({
       logger.log('[generateCard] Starting parallel processing: text expansion + image generation')
       logger.log('[Image Models] Hero:', heroImageModel || 'cogview-3-flash', 'Sections: cogview-3-flash')
 
-      // Process 1: Text Expansion (9 sentences in batches of 3)
+      // Process 1: Text Expansion (3 sections in parallel)
       const textExpansionProcess = async () => {
         logger.log('[Text Expansion] Starting...')
 
-        // Batch processing function
-        const processBatch = async (items, batchSize, delayMs, processor) => {
-          const results = []
-          for (let i = 0; i < items.length; i += batchSize) {
-            const batch = items.slice(i, i + batchSize)
-            logger.log(`[processBatch] Processing batch ${Math.floor(i / batchSize) + 1}, size: ${batch.length}`)
+        // Expand all 3 sections in parallel (each section = 1 API call for all 3 paragraphs)
+        const expansionPromises = outline.sections.map(async (section, sectionIndex) => {
+          logger.log(`[Text Expansion] Section ${sectionIndex + 1}: ${section.title}`)
 
-            const batchResults = await Promise.all(batch.map((item, idx) => processor(item, i + idx)))
-            results.push(...batchResults)
+          try {
+            let retries = 2
+            let expandedSection
 
-            if (i + batchSize < items.length) {
-              logger.log(`[processBatch] Waiting ${delayMs}ms before next batch...`)
-              await new Promise(resolve => setTimeout(resolve, delayMs))
-            }
-          }
-          return results
-        }
-
-        // Collect all sentences (3 sections × 3 sentences = 9 total)
-        const allSentences = []
-        outline.sections.forEach((section, sectionIndex) => {
-          section.sentences.forEach((sentence, sentenceIndex) => {
-            allSentences.push({
-              section,
-              sectionIndex,
-              sentence,
-              sentenceIndex,
-              model: 'deepseek-chat'
-            })
-          })
-        })
-
-        logger.log(`[Text Expansion] Processing ${allSentences.length} sentences (3 sections × 3 sentences)`)
-
-        // Process in batches of 3 (3 batches total: 9 sentences / 3 per batch)
-        const processedSentences = await processBatch(
-          allSentences,
-          3,
-          2000,
-          async (item, globalIndex) => {
-            const { section, sectionIndex, sentence, sentenceIndex, model } = item
-
-            logger.log(`[Text Expansion] Section ${sectionIndex + 1}, Sentence ${sentenceIndex + 1} (${globalIndex + 1}/${allSentences.length})`)
-
-            try {
-              let paragraph
-              let retries = 2
-
-              while (retries > 0) {
-                try {
-                  paragraph = await expandSentence(section, sentence, sentenceIndex, apiKey, self.data.language, model, apiKeys)
-                  logger.log(`[Text Expansion] Section ${sectionIndex + 1}, Sentence ${sentenceIndex + 1} expanded`)
-                  break
-                } catch (error) {
-                  retries--
-                  if (retries > 0 && error.message && error.message.includes('Rate limit')) {
-                    logger.log(`[Text Expansion] Rate limited, retrying in 3s... (${retries} left)`)
-                    await new Promise(resolve => setTimeout(resolve, 3000))
-                  } else {
-                    throw error
-                  }
+            while (retries > 0) {
+              try {
+                // Use expandSection to expand all 3 sentences at once
+                expandedSection = await expandSection(section, apiKey, self.data.language, 'deepseek-chat', apiKeys)
+                logger.log(`[Text Expansion] Section ${sectionIndex + 1} expanded successfully`)
+                break
+              } catch (error) {
+                retries--
+                if (retries > 0 && error.message && error.message.includes('Rate limit')) {
+                  logger.log(`[Text Expansion] Rate limited, retrying in 3s... (${retries} left)`)
+                  await new Promise(resolve => setTimeout(resolve, 3000))
+                } else {
+                  throw error
                 }
               }
+            }
 
-              return { sectionIndex, sentenceIndex, paragraph }
-            } catch (error) {
-              logger.error(`[Text Expansion] Section ${sectionIndex + 1}, Sentence ${sentenceIndex + 1} failed:`, error)
-              return {
-                sectionIndex,
-                sentenceIndex,
-                paragraph: `${sentenceIndex + 1}. ${sentence}`
+            return {
+              index: sectionIndex,
+              expandedSection: {
+                intro: expandedSection.intro,
+                subParagraphs: expandedSection.subParagraphs,
+                imageUrl: ''
               }
             }
-          }
-        )
-
-        // Group into sections
-        const expandedSections = outline.sections.map((section, sectionIndex) => {
-          const sectionSentences = processedSentences
-            .filter(p => p.sectionIndex === sectionIndex)
-            .sort((a, b) => a.sentenceIndex - b.sentenceIndex)
-            .map(p => p.paragraph)
-
-          const intro = sectionSentences.length > 0
-            ? `Explore ${section.title} through these key insights:`
-            : section.title
-
-          return {
-            index: sectionIndex,
-            expandedSection: {
-              intro: intro,
-              subParagraphs: sectionSentences,
-              imageUrl: ''
+          } catch (error) {
+            logger.error(`[Text Expansion] Section ${sectionIndex + 1} failed:`, error)
+            // Fallback to basic structure
+            return {
+              index: sectionIndex,
+              expandedSection: {
+                intro: section.title,
+                subParagraphs: section.sentences.map((s, i) => `${i + 1}. ${s}`),
+                imageUrl: ''
+              }
             }
           }
         })
 
+        const expandedSections = await Promise.all(expansionPromises)
         logger.log('[Text Expansion] All 3 sections completed')
         return expandedSections
       }
