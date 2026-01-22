@@ -13,8 +13,6 @@ const { globalDebouncer, globalRateLimiter } = require('../../utils/rate-limiter
 
 const generateArticleOutline = bigModelModule.generateArticleOutline
 const expandSection = bigModelModule.expandSection
-const expandSentence = bigModelModule.expandSentence
-const generateImagesForParagraphs = bigModelModule.generateImagesForParagraphs
 const generateHeroImage = bigModelModule.generateHeroImage
 const generateImage = bigModelModule.generateImage
 
